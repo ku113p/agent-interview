@@ -1,3 +1,5 @@
+import os
+
 from pydantic import Field, PostgresDsn, RedisDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -15,7 +17,9 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: SecretStr = Field(default=SecretStr("sk-placeholder"))
     OPENAI_BASE_URL: str | None = Field(default=None)
     MODEL_NAME: str = "openai/gpt-4o-mini"
-    USE_SIMULATED_LLM: bool = False
+    USE_SIMULATED_LLM: bool = Field(
+        default_factory=lambda: "PYTEST_CURRENT_TEST" in os.environ
+    )
 
     # App Defaults
     ENVIRONMENT: str = "local"
