@@ -57,7 +57,7 @@ The following areas have been implemented or are pending:
 
 ### 3.1 Domain Layer (Priority: High)
 *   [x] **UserProfile Entities:** Verify validation logic (Pydantic constraints).
-*   [ ] **Events:** Ensure events are immutable and serializable. *(No event file found)*
+*   [N/A] **Events:** Ensure events are immutable and serializable. *(Not implemented - planned feature mentioned in architecture docs but no actual event files exist)*
 
 ### 3.2 App Layer (Priority: High)
 *   [x] **Graph Nodes:** Test individual nodes (`Critic`, `Architect`) by mocking the State.

@@ -1,9 +1,10 @@
-import pytest
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
-from src.infra.vector.memory import RedisMemoryService
+import pytest
+
 from src.domain.entities.memory import MemoryFragment, MemoryKind
+from src.infra.vector.memory import RedisMemoryService
 
 
 @pytest.fixture
