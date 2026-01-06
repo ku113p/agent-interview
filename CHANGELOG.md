@@ -17,6 +17,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `src/app/prompts/renderer.py` PromptRenderer service
   - `tests/unit/app/prompts/test_renderer.py`
 
+- Telegram Integration (✅ RA-003)
+  - `src/entrypoints/telegram/client.py` Async Telegram Client with retries
+  - `src/entrypoints/telegram/webhook.py` Full webhook implementation
+  - `tests/unit/entrypoints/telegram/` Unit tests covering client and webhook logic
+  - Added `httpx` and `respx` dependencies
+
 ### Changed
 - Updated `src/infra/llm/client.py` to use LLMError exceptions
 - Refactored all graph nodes to use externalized prompt templates

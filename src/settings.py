@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     REDIS_URL: RedisDsn = Field(default="redis://localhost:6379/0")  # type: ignore
 
     OPENAI_API_KEY: SecretStr = Field(default=SecretStr("sk-placeholder"))
+    TELEGRAM_BOT_TOKEN: SecretStr = Field(default=SecretStr("123:ABC-placeholder"))
     OPENAI_BASE_URL: str | None = Field(default=None)
     MODEL_NAME: str = "openai/gpt-4o-mini"
     USE_SIMULATED_LLM: bool = Field(
