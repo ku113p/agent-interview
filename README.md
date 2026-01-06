@@ -73,7 +73,19 @@ src/
 ├── entrypoints/    # External Interfaces (API, Telegram)
 ├── infra/          # Adapters (DB, LLM, Vector)
 └── settings.py     # Configuration
+
+docs/
+├── architecture/   # ADRs, Patterns, Context
+├── planning/       # Roadmap, Refactoring Plans
+├── guides/         # Testing, Standards
+└── archive/        # Historical records
 ```
+
+## 📚 Documentation
+- **Assessment**: [TODO.md](TODO.md) (Current Tasks)
+- **Architecture**: [Decisions](docs/architecture/DECISIONS.md) | [Patterns](docs/architecture/PATTERNS.md)
+- **Planning**: [Roadmap](docs/planning/ROADMAP.md) | [Refactoring](docs/planning/REFACTORING.md)
+- **Guides**: [Testing](docs/guides/TESTING.md) | [Standards](docs/guides/CODING_STANDARDS.md)
 
 ## 🛡️ Quality Assurance
 -   **Linting:** `uv run ruff check src`

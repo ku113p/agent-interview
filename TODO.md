@@ -11,7 +11,7 @@
 ### 1. Domain Layer - Exception Hierarchy Missing
 **Status**: ✅ **COMPLETED** (2026-01-06)  
 **Impact**: High - All error handling uses generic exceptions  
-**Description**: The PATTERNS.md and ARCHITECTURE_DECISIONS.md reference a Domain Exception hierarchy, but it doesn't exist in the codebase.
+**Description**: The [PATTERNS.md](docs/architecture/PATTERNS.md) and [ARCHITECTURE_DECISIONS.md](docs/architecture/DECISIONS.md) reference a Domain Exception hierarchy, but it doesn't exist in the codebase.
 
 **Action Items**:
 - [x] Create `src/domain/exceptions.py` with:
@@ -129,7 +129,7 @@
 ### 6. Observability - LangFuse Not Integrated
 **Status**: ❌ Not Implemented  
 **Impact**: Medium-High - Cannot debug agent behavior  
-**Description**: ARCHITECTURE_DECISIONS.md mandates LangFuse integration with `@observe` decorators, but none present.
+**Description**: [ARCHITECTURE_DECISIONS.md](docs/architecture/DECISIONS.md) mandates LangFuse integration with `@observe` decorators, but none present.
 
 **Action Items**:
 - [ ] Install `langfuse` SDK
@@ -193,7 +193,7 @@
 ### 9. API DTOs - Direct State Exposure
 **Status**: ⚠️ Acceptable but Not Best Practice  
 **Impact**: Medium - Breaks encapsulation  
-**Description**: PATTERNS.md warns against exposing internal state directly. Current API returns raw state snapshot.
+**Description**: [PATTERNS.md](docs/architecture/PATTERNS.md) warns against exposing internal state directly. Current API returns raw state snapshot.
 
 **Action Items**:
 - [ ] Create proper DTOs for API responses
@@ -230,7 +230,7 @@
 ### 11. Testing - Integration Tests Missing
 **Status**: ❌ Not Implemented  
 **Impact**: Medium - Can't verify infra layer properly  
-**Description**: TEST_PLAN.md mentions integration tests but none exist.
+**Description**: [TESTING.md](docs/guides/TESTING.md) mentions integration tests but none exist.
 
 **Action Items**:
 - [ ] Create `tests/integration/` directory
