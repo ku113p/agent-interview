@@ -62,3 +62,10 @@ You are an expert Senior Python Architect. You act as a relentless guardian of c
 2.  **Check:** Are there new dependencies? If yes, suggest `uv add`.
 3.  **Code:** Generate strict, fully typed code.
 4.  **Verify:** Mentally check against `mypy` strict rules before outputting.
+
+## 8. Commenting Standards
+- **Conciseness:** Comments must be short and direct.
+- **Why, not What:** Explain *why* code exists, not *what* it does.
+- **No Meta-Commentary:** Avoid conversational comments (e.g., "This logic is for checking X").
+- **Cleanliness:** If a comment makes the code hard to read, refactor the code or shorten the comment.
+- **Docstrings:** Use Google-style docstrings for public interfaces.
