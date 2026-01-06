@@ -3,6 +3,7 @@ Universal Engineering Standards
 > **Level:** Galactic Standard / Staff Engineer +
 > **Philosophy:** "Code is read 10x more often than it is written."
 > **Enforcement:** CI Pipeline fails if these patterns are violated.
+> **Implementation Status**: \u2705 Exception Hierarchy (Pattern #9) | \u2705 Prompt Templates (See renderer.py)
 
 This document contains **Golden Snippets**. Do not reinvent the wheel. Copy, paste, and adapt these patterns. They solve 99% of architectural headaches (race conditions, coupling, untestable code).
 

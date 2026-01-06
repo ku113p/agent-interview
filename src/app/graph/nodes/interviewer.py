@@ -1,6 +1,7 @@
 from typing import Any
 
 from src.app.graph.state import AgentState
+from src.app.prompts.renderer import render_prompt
 from src.infra.llm.client import get_llm_client
 
 llm_client = get_llm_client()
@@ -12,8 +13,13 @@ async def interviewer_node(state: AgentState) -> dict[str, Any]:
     """
     messages = state["messages"]
 
+    system_prompt = render_prompt(
+        "interviewer.j2",
+        context=str(state.get("plan", "No plan established yet."))
+    )
+
     response_text = await llm_client.generate_text(
-        system_prompt="You are the Interviewer...", messages=messages
+        system_prompt=system_prompt, messages=messages
     )
 
     return {

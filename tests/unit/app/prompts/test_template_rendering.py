@@ -55,3 +55,19 @@ def test_architect_template_renders_special_characters(jinja_env: Environment) -
     assert "User's Name" in rendered
     assert "Python & JavaScript" in rendered or "Python &amp; JavaScript" in rendered
     assert "2024" in rendered
+
+
+def test_critic_template_renders(jinja_env: Environment) -> None:
+    """Test that critic template renders correctly."""
+    template = jinja_env.get_template("critic.j2")
+    rendered = template.render(plan_json='{"steps": ["A"]}')
+    assert "Critic" in rendered
+    assert '"steps": ["A"]' in rendered
+
+
+def test_interviewer_template_renders(jinja_env: Environment) -> None:
+    """Test that interviewer template renders correctly."""
+    template = jinja_env.get_template("interviewer.j2")
+    rendered = template.render(context="Some context")
+    assert "Interviewer" in rendered
+    assert "Some context" in rendered

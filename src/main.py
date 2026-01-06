@@ -13,6 +13,7 @@ from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 from src.app.graph.workflow import create_graph
 from src.entrypoints.api import router as api_router
+from src.entrypoints.api.error_handlers import register_error_handlers
 from src.entrypoints.telegram import webhook
 from src.settings import settings
 
@@ -30,6 +31,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(title="Modular Agentic Monolith", version="0.1.0", lifespan=lifespan)
+register_error_handlers(app)
 
 app.include_router(api_router.router)
 app.include_router(webhook.router)

@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from src.app.dependencies import get_graph
@@ -38,32 +38,24 @@ async def chat_message(
 
     config = {"configurable": {"thread_id": request.thread_id}}
 
-    try:
-        final_state = await graph.ainvoke(input_state, config=config)
+    final_state = await graph.ainvoke(input_state, config=config)
 
-        messages = final_state.get("messages", [])
-        if not messages:
-            return ChatResponse(
-                response="No response generated.",
-                step_count=final_state.get("step_count", 0),
-            )
-
-        last_msg = messages[-1]
-        content = last_msg.content if hasattr(last_msg, "content") else str(last_msg)
-
-        if isinstance(last_msg, dict):
-            content = last_msg.get("content", "")
-
+    messages = final_state.get("messages", [])
+    if not messages:
         return ChatResponse(
-            response=str(content), step_count=final_state.get("step_count", 0)
+            response="No response generated.",
+            step_count=final_state.get("step_count", 0),
         )
 
-    except Exception as e:
-        import structlog
+    last_msg = messages[-1]
+    content = last_msg.content if hasattr(last_msg, "content") else str(last_msg)
 
-        logger = structlog.get_logger()
-        logger.exception("chat_message_failed", error=str(e))
-        raise HTTPException(status_code=500, detail=str(e)) from e
+    if isinstance(last_msg, dict):
+        content = last_msg.get("content", "")
+
+    return ChatResponse(
+        response=str(content), step_count=final_state.get("step_count", 0)
+    )
 
 
 @router.get("/debug/state/{thread_id}")
@@ -75,11 +67,8 @@ async def get_state(
     Returns the current state of a thread.
     """
     config = {"configurable": {"thread_id": thread_id}}
-    try:
-        # Get the current state snapshot
-        state_snapshot = await graph.aget_state(config)
-        return dict(state_snapshot.values)
-    except Exception as e:
-        raise HTTPException(
-            status_code=404, detail=f"Thread not found or error: {str(e)}"
-        ) from e
+    state_snapshot = await graph.aget_state(config)
+    if not state_snapshot.values:
+        from src.domain.exceptions import ResourceNotFound
+        raise ResourceNotFound(f"Thread '{thread_id}' not found.")
+    return dict(state_snapshot.values)

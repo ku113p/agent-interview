@@ -65,4 +65,41 @@ def test_get_state_endpoint_success(client: TestClient) -> None:
     data = response.json()
     assert "plan" in data
     assert "last_agent" in data
+    assert "last_agent" in data
     assert data["last_agent"] == "interviewer"
+
+
+def test_get_state_endpoint_not_found(
+    client: TestClient, mock_graph: AsyncMock
+) -> None:
+    """Test that /debug/state returns 404 if state not found."""
+    # Mock aget_state to return empty values
+    state_snapshot = MagicMock()
+    state_snapshot.values = {}
+    mock_graph.aget_state = AsyncMock(return_value=state_snapshot)
+
+    response = client.get("/v1/chat/debug/state/missing_thread")
+
+    assert response.status_code == 404
+    data = response.json()
+    assert data["error"] == "ResourceNotFound"
+    assert "not found" in data["message"]
+
+
+def test_chat_message_endpoint_domain_error(
+    client: TestClient, mock_graph: AsyncMock
+) -> None:
+    """Test that /message handles domain errors correctly."""
+    from src.domain.exceptions import BusinessRuleViolation
+
+    mock_graph.ainvoke.side_effect = BusinessRuleViolation("Too many retries")
+
+    response = client.post(
+        "/v1/chat/message",
+        json={"user_id": "test_user", "message": "Hello"},
+    )
+
+    assert response.status_code == 400
+    data = response.json()
+    assert data["error"] == "BusinessRuleViolation"
+    assert data["message"] == "Too many retries"

@@ -28,9 +28,10 @@ class UserProfile(BaseModel):
     @classmethod
     def validate_email_domain(cls, v: str) -> str:
         """Domain Logic: We don't accept disposable emails."""
-        if "tempmail" in v:
+        v_lower = v.lower()
+        if "tempmail" in v_lower:
             raise ValueError("Disposable emails are forbidden.")
-        return v.lower()
+        return v_lower
 
     def activate(self) -> "UserProfile":
         """

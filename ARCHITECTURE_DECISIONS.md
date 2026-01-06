@@ -97,4 +97,51 @@ This document serves as the single source of truth for architectural, design, an
 * **Decision:**
     1.  [cite_start]**Context Separation:** Isolate user input using delimiters (e.g., XML tags like `<user_input>`)[cite: 187].
     2.  [cite_start]**Dual LLM Pattern:** Use a lightweight "censor" model to check inputs for attacks before they reach the main Interviewer agent[cite: 188].
-* **Consequences:** Adds a small latency overhead but significantly increases security against social engineering attacks..
+* **Consequences:** Adds a small latency overhead but significantly increases security against social engineering attacks.
+
+---
+
+## 5. Error Handling \u0026 Maintainability
+
+### ADR-012: Domain Exception Hierarchy
+* **Status:** \u2705 **Implemented** (2026-01-06)
+* **Context:** Generic exceptions (`Exception`, `ValueError`) make it difficult to distinguish business rule violations from infrastructure failures and map errors to appropriate HTTP status codes.
+* **Decision:** 
+    1. Create a typed domain exception hierarchy in `src/domain/exceptions.py`
+    2. All domain layer code must raise specific exceptions (`DomainError`, `ResourceNotFound`, `BusinessRuleViolation`)
+    3. FastAPI exception handlers map domain exceptions to HTTP statuses (404, 400, 500)
+    4. LLM errors use specialized `LLMError`, `LLMTimeoutError`, `LLMResponseError`
+* **Consequences:** 
+    - Improved error diagnostics and debugging
+    - Automatic, consistent API error responses
+    - Clear separation between domain logic and HTTP concerns
+    - Enables proper error telemetry and alerting
+* **Implementation:** See `src/domain/exceptions.py`, `src/entrypoints/api/error_handlers.py`
+
+### ADR-013: Externalized Prompt Templates
+* **Status:** \u2705 **Implemented** (2026-01-06)
+* **Context:** Hardcoded prompts in Python code make it impossible to iterate on prompt engineering without code changes, preventing A/B testing and versioning.
+* **Decision:**
+    1. All system prompts must be defined in Jinja2 templates (`src/app/prompts/*.j2`)
+    2. Use `PromptRenderer` service to render templates with context
+    3. Prompts are versioned by filename (e.g., `architect_v1.j2`, `critic_v2.j2`)
+    4. Zero hardcoded prompt strings in graph nodes
+* **Consequences:**
+    - Enables rapid prompt iteration without code deployment
+    - A/B testing ready (can swap templates via config)
+    - Prompts are reviewable as separate files in version control
+    - Non-engineers can modify prompts safely
+* **Implementation:** See `src/app/prompts/renderer.py`, `src/app/prompts/*.j2`
+
+---
+
+## 6. Implementation Progress
+
+**Completed ADRs**:
+- \u2705 ADR-001 through ADR-011 (original design)
+- \u2705 ADR-012: Domain Exception Hierarchy
+- \u2705 ADR-013: Externalized Prompt Templates
+
+**In Progress**: None
+
+**Planned**: Memory integration, dependency injection refactoring

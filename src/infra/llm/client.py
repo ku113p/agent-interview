@@ -62,7 +62,8 @@ class SimulatedOpenAIClient(LLMProviderProtocol):
             return schema.model_construct()
         except Exception as e:
             log.error("llm_call_failed", error=str(e))
-            raise e
+            from src.domain.exceptions import LLMError
+            raise LLMError(f"Simulated LLM call failed: {str(e)}") from e
 
 
 class OpenAIClient(LLMProviderProtocol):
@@ -128,7 +129,8 @@ class OpenAIClient(LLMProviderProtocol):
             return content
         except Exception as e:
             log.error("llm_call_failed", error=str(e))
-            raise e
+            from src.domain.exceptions import LLMError
+            raise LLMError(f"LLM call failed: {str(e)}") from e
 
     @retry(
         stop=stop_after_attempt(3),
@@ -145,7 +147,6 @@ class OpenAIClient(LLMProviderProtocol):
 
         clean_messages = self._convert_messages(messages)
         msgs = [{"role": "system", "content": system_prompt}] + clean_messages
-
         try:
             response = await self.client.beta.chat.completions.parse(
                 model=self.model,
@@ -160,7 +161,18 @@ class OpenAIClient(LLMProviderProtocol):
             return parsed
         except Exception as e:
             log.error("llm_call_failed", error=str(e))
-            raise e
+            from src.domain.exceptions import LLMError, LLMResponseError
+
+            is_parse_error = (
+                "parsing" in str(e).lower()
+                or "structured" in str(e).lower()
+                or isinstance(e, ValueError)
+            )
+            if is_parse_error:
+                raise LLMResponseError(
+                    f"Failed to parse structured output: {str(e)}"
+                ) from e
+            raise LLMError(f"LLM call failed: {str(e)}") from e
 
 
 def get_llm_client() -> LLMProviderProtocol:

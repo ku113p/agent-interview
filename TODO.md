@@ -1,55 +1,65 @@
 # 📋 TODO: Improvements & Future Enhancements
 
-> **Status**: Generated on 2026-01-06  
-> **Priority Levels**: 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low
+> **Status**: Last Updated 2026-01-06 23:25  
+> **Priority Levels**: 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low  
+> **Completed This Session**: 2 Critical items ✅
 
 ---
 
 ## 🔴 Critical Priority
 
 ### 1. Domain Layer - Exception Hierarchy Missing
-**Status**: ❌ Not Implemented  
+**Status**: ✅ **COMPLETED** (2026-01-06)  
 **Impact**: High - All error handling uses generic exceptions  
 **Description**: The PATTERNS.md and ARCHITECTURE_DECISIONS.md reference a Domain Exception hierarchy, but it doesn't exist in the codebase.
 
 **Action Items**:
-- [ ] Create `src/domain/exceptions.py` with:
+- [x] Create `src/domain/exceptions.py` with:
   - `DomainError` (base class)
   - `ResourceNotFound` (maps to HTTP 404)
   - `BusinessRuleViolation` (maps to HTTP 400/409)
   - `UserNotFoundError`, `MemoryNotFoundError`, etc.
-- [ ] Update all domain entities to raise typed exceptions
-- [ ] Create FastAPI exception handlers to map domain errors to HTTP responses
-- [ ] Update tests to verify exception behavior
+  - `LLMError`, `LLMTimeoutError`, `LLMResponseError` (bonus)
+- [x] Update all domain entities to raise typed exceptions
+- [x] Create FastAPI exception handlers to map domain errors to HTTP responses
+- [x] Update tests to verify exception behavior
 
-**Files to Create/Modify**:
-- `src/domain/exceptions.py` (new)
-- `src/entrypoints/api/error_handlers.py` (new)
-- `src/main.py` (add exception handlers)
+**Files Created**:
+- ✅ `src/domain/exceptions.py` 
+- ✅ `src/entrypoints/api/error_handlers.py`
+- ✅ `tests/unit/domain/test_exceptions.py`
+- ✅ Updated `src/main.py` to register error handlers
+- ✅ Updated `src/infra/llm/client.py` to use LLM exceptions
 
 ---
 
 ### 2. Prompt Engineering - Prompts Are Hardcoded
-**Status**: ⚠️ Partially Implemented  
+**Status**: ✅ **COMPLETED** (2026-01-06)  
 **Impact**: High - Cannot A/B test or version prompts  
-**Description**: Only `architect.j2` template exists. All other prompts in nodes are hardcoded strings.
+**Description**: All prompts are now externalized to Jinja2 templates.
 
 **Action Items**:
-- [ ] Create Jinja2 templates for all agent nodes:
+- [x] Create Jinja2 templates for all agent nodes:
   - `src/app/prompts/critic.j2`
   - `src/app/prompts/interviewer.j2`
-- [ ] Implement prompt versioning strategy (e.g., `architect_v2.j2`)
-- [ ] Create prompt rendering service/utility
-- [ ] Add prompt validation tests
-- [ ] Consider implementing prompt registry for A/B testing
+- [x] Create prompt rendering service/utility
+- [x] Add prompt validation tests
+- [ ] Implement prompt versioning strategy (e.g., `architect_v2.j2`) - **FUTURE**
+- [ ] Consider implementing prompt registry for A/B testing - **FUTURE**
 
-**Files to Create/Modify**:
-- `src/app/prompts/critic.j2` (new)
-- `src/app/prompts/interviewer.j2` (new)
-- `src/app/prompts/renderer.py` (new)
-- `src/app/graph/nodes/architect.py` (modify to use templates)
-- `src/app/graph/nodes/critic.py` (modify)
-- `src/app/graph/nodes/interviewer.py` (modify)
+**Files Created**:
+- ✅ `src/app/prompts/critic.j2`
+- ✅ `src/app/prompts/interviewer.j2`
+- ✅ `src/app/prompts/renderer.py`
+- ✅ `tests/unit/app/prompts/test_renderer.py`
+- ✅ Updated `src/app/graph/nodes/architect.py`
+- ✅ Updated `src/app/graph/nodes/critic.py`
+- ✅ Updated `src/app/graph/nodes/interviewer.py`
+
+**Benefits Achieved**:
+- Zero hardcoded prompts in Python code
+- Can swap prompt versions without code changes
+- Ready for A/B testing when needed
 
 ---
 
@@ -391,15 +401,18 @@
 ## 📊 Summary Statistics
 
 - **Total Items**: 20
-- **Critical (🔴)**: 3
-- **High (🟠)**: 5
-- **Medium (🟡)**: 5
-- **Low (🟢)**: 7
+- **Completed (\u2705)**: 2 (10%)
+- **Critical (\ud83d\udd34)**: 1 remaining (2 completed)
+- **High (\ud83d\udfe0)**: 5
+- **Medium (\ud83d\udfe1)**: 5
+- **Low (\ud83d\udfe2)**: 7
 
-**Estimated Implementation Time**:
-- Critical: ~3-4 days
+**Estimated Implementation Time** (Remaining):
+- Critical: ~7 days (Telegram Integration)
 - High: ~1 week
 - Medium: ~3-4 days
 - Low: ~1-2 days
 
-**Total**: ~2-3 weeks for complete implementation
+**Total Remaining**: ~2.5-3 weeks for complete implementation
+
+**Progress**: 2/20 items completed (10%) - \ud83c\udf89 Great start!

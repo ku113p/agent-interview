@@ -1,6 +1,8 @@
+import json
 from typing import Any
 
 from src.app.graph.state import AgentState
+from src.app.prompts.renderer import render_prompt
 from src.app.schemas import CritiqueSchema
 from src.infra.llm.client import get_llm_client
 
@@ -13,8 +15,22 @@ async def critic_node(state: AgentState) -> dict[str, Any]:
     """
     messages = state["messages"]
 
+    plan = state.get("plan")
+    plan_data: dict[str, Any]
+    if plan is not None and hasattr(plan, "model_dump"):
+        plan_data = plan.model_dump()
+    elif isinstance(plan, dict):
+        plan_data = plan
+    else:
+        plan_data = {}
+
+    system_prompt = render_prompt(
+        "critic.j2",
+        plan_json=json.dumps(plan_data)
+    )
+
     critique = await llm_client.generate(
-        system_prompt="You are a Critic. Review the plan...",
+        system_prompt=system_prompt,
         messages=messages,
         schema=CritiqueSchema,
     )
