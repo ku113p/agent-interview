@@ -1,23 +1,21 @@
-# Planning Documentation
+# Planning & Architecture Documents
 
-## Active Planning Documents
+This directory contains the strategic documents for the project's development.
 
-### 📋 [TODO.md](../../TODO.md) ⭐ PRIMARY
-**Purpose**: Day-to-day task tracking  
-**Scope**: 20 specific improvement items prioritized by impact  
-**Update Frequency**: Daily/weekly as work progresses
+## 📄 Key Documents
 
-### 🗺️ [ROADMAP.md](ROADMAP.md)
-**Purpose**: Strategic 90-day production timeline  
-**Scope**: Sprint-based execution plan with dates and owners  
-**Update Frequency**: Sprint reviews (bi-weekly)
+### 1. [Technical Specification](TECHNICAL_SPECIFICATION.md)
+**The Source of Truth.**
+Formal description of the "Deep Profiling & Biography Agent System", including architecture, roles, and workflows.
 
-### 🔧 [REFACTORING.md](REFACTORING.md)
-**Purpose**: Technical debt and code quality improvements  
-**Scope**: 9 architectural refactoring initiatives  
-**Update Frequency**: As refactorings are completed
+### 2. [Refactoring Plan](REFACTORING_PLAN.md)
+**The Battle Plan.**
+Step-by-step guide to transforming the current prototype into the system described in the Technical Specification.
 
-## Relationship
-- TODO.md = **What** needs to be done (task list)
-- ROADMAP.md = **When** it will be done (timeline)
-- REFACTORING.md = **How** to do technical improvements (detailed guides)
+### 3. [Roadmap](ROADMAP.md)
+High-level timeline and phases for the project.
+
+---
+
+## 📂 Archive
+- [REFACTORING_OLD.md](REFACTORING_OLD.md): Previous refactoring plan (Agentic Monolith V1), kept for reference.
