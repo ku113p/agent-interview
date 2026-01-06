@@ -20,11 +20,7 @@ class RedisMemoryService(MemoryServiceProtocol):
         await self._redis.lpush(key, data)  # type: ignore
 
     async def search(
-        self, 
-        query: str, 
-        user_id: UUID, 
-        kind: MemoryKind | None = None, 
-        limit: int = 5
+        self, query: str, user_id: UUID, kind: MemoryKind | None = None, limit: int = 5
     ) -> list[MemoryFragment]:
         """Mock semantic search."""
         return await self.get_recent(user_id, limit)

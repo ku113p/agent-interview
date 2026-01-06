@@ -22,7 +22,7 @@ class ChatResponse(BaseModel):
 @router.post("/message", response_model=ChatResponse)
 async def chat_message(
     request: ChatRequest,
-    graph: Any = Depends(get_graph)  # noqa: B008
+    graph: Any = Depends(get_graph),  # noqa: B008
 ) -> ChatResponse:
     """
     Main entrypoint for the agent chat.
@@ -45,7 +45,7 @@ async def chat_message(
         if not messages:
             return ChatResponse(
                 response="No response generated.",
-                step_count=final_state.get("step_count", 0)
+                step_count=final_state.get("step_count", 0),
             )
 
         last_msg = messages[-1]
@@ -55,17 +55,21 @@ async def chat_message(
             content = last_msg.get("content", "")
 
         return ChatResponse(
-            response=str(content),
-            step_count=final_state.get("step_count", 0)
+            response=str(content), step_count=final_state.get("step_count", 0)
         )
 
     except Exception as e:
+        import structlog
+
+        logger = structlog.get_logger()
+        logger.exception("chat_message_failed", error=str(e))
         raise HTTPException(status_code=500, detail=str(e)) from e
+
 
 @router.get("/debug/state/{thread_id}")
 async def get_state(
     thread_id: str,
-    graph: Any = Depends(get_graph)  # noqa: B008
+    graph: Any = Depends(get_graph),  # noqa: B008
 ) -> dict[str, Any]:
     """
     Returns the current state of a thread.
@@ -77,6 +81,5 @@ async def get_state(
         return dict(state_snapshot.values)
     except Exception as e:
         raise HTTPException(
-            status_code=404, 
-            detail=f"Thread not found or error: {str(e)}"
+            status_code=404, detail=f"Thread not found or error: {str(e)}"
         ) from e

@@ -14,14 +14,15 @@ def should_continue(state: AgentState) -> str:
     Decides the next step after the Critic.
     """
     critique = state.get("critique")
-    
+
     if critique and critique.is_approved:
         return "interviewer"
-    
+
     if state.get("step_count", 0) > 5:
         return "interviewer"
-        
+
     return "architect"
+
 
 def create_graph(checkpointer: Any = None) -> Any:
     """
@@ -37,16 +38,13 @@ def create_graph(checkpointer: Any = None) -> Any:
 
     workflow.add_edge(START, "architect")
     workflow.add_edge("architect", "critic")
-    
+
     workflow.add_conditional_edges(
         "critic",
         should_continue,
-        {
-            "interviewer": "interviewer",
-            "architect": "architect"
-        }
+        {"interviewer": "interviewer", "architect": "architect"},
     )
-    
+
     workflow.add_edge("interviewer", END)
 
     checkpointer = checkpointer or MemorySaver()

@@ -1,9 +1,9 @@
 from typing import Any
 
 from src.app.graph.state import AgentState
-from src.infra.llm.client import SimulatedOpenAIClient
+from src.infra.llm.client import get_llm_client
 
-llm_client = SimulatedOpenAIClient()
+llm_client = get_llm_client()
 
 
 async def interviewer_node(state: AgentState) -> dict[str, Any]:
@@ -13,8 +13,7 @@ async def interviewer_node(state: AgentState) -> dict[str, Any]:
     messages = state["messages"]
 
     response_text = await llm_client.generate_text(
-        system_prompt="You are the Interviewer...",
-        messages=messages
+        system_prompt="You are the Interviewer...", messages=messages
     )
 
     return {

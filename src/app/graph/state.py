@@ -14,7 +14,7 @@ class AgentState(TypedDict):
 
     user_id: str
     plan: PlanSchema | None
-    critique: Any | None  
+    critique: Any | None
 
     step_count: int
     error_count: int
