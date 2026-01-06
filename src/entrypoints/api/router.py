@@ -3,7 +3,9 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from src.app.dependencies import get_graph
+from src.app.dependencies import get_db_session, get_graph, get_memory_service
+from src.domain.ports.memory_service import MemoryServiceProtocol
+from src.infra.db.session import AsyncSession
 
 router = APIRouter(prefix="/v1/chat")
 
@@ -23,6 +25,8 @@ class ChatResponse(BaseModel):
 async def chat_message(
     request: ChatRequest,
     graph: Any = Depends(get_graph),  # noqa: B008
+    db: AsyncSession = Depends(get_db_session),
+    memory: MemoryServiceProtocol = Depends(get_memory_service),
 ) -> ChatResponse:
     """
     Main entrypoint for the agent chat.
@@ -36,7 +40,13 @@ async def chat_message(
         "plan": None,
     }
 
-    config = {"configurable": {"thread_id": request.thread_id}}
+    config = {
+        "configurable": {
+            "thread_id": request.thread_id,
+            "db_session": db,
+            "memory_service": memory,
+        }
+    }
 
     final_state = await graph.ainvoke(input_state, config=config)
 
