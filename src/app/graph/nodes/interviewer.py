@@ -1,6 +1,7 @@
 from typing import Any
 
 from langchain_core.runnables import RunnableConfig
+from langfuse import observe
 
 from src.app.graph.state import AgentState
 from src.app.prompts.renderer import render_prompt
@@ -9,9 +10,8 @@ from src.infra.llm.client import get_llm_client
 llm_client = get_llm_client()
 
 
-async def interviewer_node(
-    state: AgentState, config: RunnableConfig
-) -> dict[str, Any]:
+@observe()
+async def interviewer_node(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     """
     Generates the next response to the user.
     """
@@ -21,8 +21,7 @@ async def interviewer_node(
     messages = state["messages"]
 
     system_prompt = render_prompt(
-        "interviewer.j2",
-        context=str(state.get("plan", "No plan established yet."))
+        "interviewer.j2", context=str(state.get("plan", "No plan established yet."))
     )
 
     response_text = await llm_client.generate_text(

@@ -9,10 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 def jinja_env() -> Environment:
     """Create Jinja2 environment for prompt templates."""
     templates_dir = (
-        Path(__file__).parent.parent.parent.parent.parent
-        / "src"
-        / "app"
-        / "prompts"
+        Path(__file__).parent.parent.parent.parent.parent / "src" / "app" / "prompts"
     )
     return Environment(loader=FileSystemLoader(str(templates_dir)))
 

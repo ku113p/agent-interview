@@ -23,6 +23,8 @@ def mock_state() -> AgentState:
         "step_count": 0,
         "error_count": 0,
         "last_agent": "start",
+        "current_sphere_id": None,
+        "plan_approved": None,
     }
 
 
@@ -82,11 +84,16 @@ async def test_node_receives_dependencies(mock_state, mock_config):
     # Execute
     # We expect these NOT to raise exceptions about missing config keys
     # We need to mock llm_client for architect node as well inside this test scope
-    with patch("src.app.graph.nodes.architect.llm_client") as mock_architect_client, \
-         patch("src.app.graph.nodes.critic.llm_client") as mock_critic_client:
-        
-        mock_architect_client.generate = AsyncMock(return_value=PlanSchema(goal_analysis="test", steps=[], missing_info=[]))
-        mock_critic_client.generate = AsyncMock(return_value=CritiqueSchema(is_approved=True, feedback="ok", score=10))
+    with (
+        patch("src.app.graph.nodes.architect.llm_client") as mock_architect_client,
+        patch("src.app.graph.nodes.critic.llm_client") as mock_critic_client,
+    ):
+        mock_architect_client.generate = AsyncMock(
+            return_value=PlanSchema(goal_analysis="test", steps=[], missing_info=[])
+        )
+        mock_critic_client.generate = AsyncMock(
+            return_value=CritiqueSchema(is_approved=True, feedback="ok", score=10)
+        )
 
         await architect_node(mock_state, mock_config)
         await critic_node(mock_state, mock_config)

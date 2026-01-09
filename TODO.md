@@ -128,27 +128,31 @@
 
 ---
 
-### 6. Observability - LangFuse Not Integrated
-**Status**: ❌ Not Implemented  
-**Impact**: Medium-High - Cannot debug agent behavior  
-**Description**: [ARCHITECTURE_DECISIONS.md](docs/architecture/DECISIONS.md) mandates LangFuse integration with `@observe` decorators, but none present.
+### 6. Observability - LangFuse Integrated
+**Status**: ✅ **COMPLETED** (2026-01-09)
+**Impact**: Medium-High - Now can debug agent behavior
+**Description**: Self-hosted LangFuse instance integrated with Docker Compose, providing full tracing of agent workflows and LLM calls. Resolved compatibility issues by using Python 3.12.
 
 **Action Items**:
-- [ ] Install `langfuse` SDK
-- [ ] Configure LangFuse connection in settings
-- [ ] Add `@observe` decorators to:
-  - Graph entry points
-  - LLM client methods
+- [x] Install `langfuse` SDK (version 3.11.2 with Python 3.12)
+- [x] Configure LangFuse connection in settings
+- [x] Add `@observe` decorators to:
+  - Graph entry points (architect_node, critic_node, interviewer_node)
+  - LLM client methods (generate_text, generate)
   - Key service methods
-- [ ] Add custom spans for graph node transitions
-- [ ] Create dashboard config for key metrics
-- [ ] Document LangFuse setup in README
+- [x] Add custom spans for graph node transitions
+- [x] Create dashboard config for key metrics (self-hosted UI)
+- [x] Document LangFuse setup in README
 
-**Files to Create/Modify**:
-- `pyproject.toml` (add langfuse dependency)
-- `src/settings.py` (add LANGFUSE_* config)
-- `src/infra/llm/client.py` (add @observe)
-- `src/app/graph/workflow.py` (add tracing)
+**Files Modified**:
+- `pyproject.toml` (added langfuse>=2.50.0 dependency)
+- `src/settings.py` (added LANGFUSE_HOST, LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY)
+- `src/infra/llm/client.py` (added @observe to OpenAIClient methods)
+- `src/app/graph/nodes/architect.py` (added @observe)
+- `src/app/graph/nodes/critic.py` (added @observe)
+- `src/app/graph/nodes/interviewer.py` (added @observe)
+- `docker-compose.yml` (langfuse-db and langfuse services)
+- `README.md` (updated technology stack and quick start)
 
 ---
 
@@ -411,19 +415,19 @@
 ## 📊 Summary Statistics
 
 - **Total Items**: 20
-- **Completed (\u2705)**: 2 (10%)
+- **Completed (\u2705)**: 4 (20%)
 - **Partial (\u26a0\ufe0f)**: 2 (Memory Integration, User Data Layer)
 - **Critical (\ud83d\udd34)**: 1 remaining (2 completed)
-- **High (\ud83d\udfe0)**: 4 (1 partial)
+- **High (\ud83d\udfe0)**: 3 (1 partial, 2 completed)
 - **Medium (\ud83d\udfe1)**: 5
 - **Low (\ud83d\udfe2)**: 7
 
 **Estimated Implementation Time** (Remaining):
 - Critical: ~7 days (Telegram Integration)
-- High: ~1 week
+- High: ~5-6 days
 - Medium: ~3-4 days
 - Low: ~1-2 days
 
-**Total Remaining**: ~2.5-3 weeks for complete implementation
+**Total Remaining**: ~1.5-2 weeks for complete implementation
 
-**Progress**: 2/20 items completed, 2 partial (20% effective progress) - \ud83c\udf89 Great start!
+**Progress**: 4/20 items completed, 2 partial (30% effective progress) - \ud83c\udf89 Great progress with LangFuse integration!

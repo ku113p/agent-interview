@@ -3,6 +3,7 @@ from typing import Any
 from uuid import NAMESPACE_DNS, UUID, uuid5
 
 from langchain_core.runnables import RunnableConfig
+from langfuse import observe
 
 from src.app.graph.state import AgentState
 from src.app.prompts.renderer import render_prompt
@@ -78,6 +79,7 @@ async def _extract_sphere_name(
     return None
 
 
+@observe()
 async def architect_node(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     """
     Manages sphere selection and plan generation.

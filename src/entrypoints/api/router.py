@@ -31,9 +31,9 @@ class ChatResponse(BaseModel):
 async def chat_message(
     request: ChatRequest,
     graph: Any = Depends(get_graph),  # noqa: B008
-    db: AsyncSession = Depends(get_db_session),
-    memory: MemoryServiceProtocol = Depends(get_memory_service),
-    sphere_repo: SphereRepositoryProtocol = Depends(get_sphere_repository),
+    db: AsyncSession = Depends(get_db_session),  # noqa: B008
+    memory: MemoryServiceProtocol = Depends(get_memory_service),  # noqa: B008
+    sphere_repo: SphereRepositoryProtocol = Depends(get_sphere_repository),  # noqa: B008
 ) -> ChatResponse:
     """
     Main entrypoint for the agent chat.

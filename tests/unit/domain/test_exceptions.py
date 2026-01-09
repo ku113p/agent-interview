@@ -13,6 +13,7 @@ def test_exception_hierarchy():
     assert issubclass(UserNotFoundError, ResourceNotFound)
     assert issubclass(MemoryNotFoundError, ResourceNotFound)
 
+
 def test_exception_messages():
     err = UserNotFoundError("User 123 not found")
     assert str(err) == "User 123 not found"

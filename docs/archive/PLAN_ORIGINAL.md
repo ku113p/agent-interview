@@ -2,7 +2,7 @@
 
 **Classification:** Enterprise Grade / Self-Hosted
 **Architecture:** Hexagonal (Ports & Adapters)
-**Tech Stack:** Python 3.14+, `uv`, LangGraph, FastAPI, PostgreSQL (Async), Redis, LangFuse (Docker).
+**Tech Stack:** Python 3.12+, `uv`, LangGraph, FastAPI, PostgreSQL (Async), Redis, LangFuse (Docker).
 
 ---
 
@@ -10,7 +10,7 @@
 **Goal:** Setup a dev environment that forbids bad code by design.
 
 - [x] **0.1. Workspace & Tooling (Strict)**
-    - [x] `uv init` & `uv python install 3.14`.
+    - [x] `uv init` & `uv python install 3.12`.
     - [x] **Dependency Grouping:** Separate `core` (langgraph, pydantic), `infra` (sqlalchemy, redis), `dev` (mypy, ruff, pytest).
     - [x] **Pre-commit Hooks:**
         -   `ruff check --fix` (Linting).

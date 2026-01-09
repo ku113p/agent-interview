@@ -6,11 +6,10 @@ from src.domain.exceptions import BusinessRuleViolation, DomainError, ResourceNo
 
 logger = structlog.get_logger()
 
+
 def register_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(DomainError)
-    async def domain_error_handler(
-        request: Request, exc: DomainError
-    ) -> JSONResponse:
+    async def domain_error_handler(request: Request, exc: DomainError) -> JSONResponse:
         status_code = 400
         if isinstance(exc, ResourceNotFound):
             status_code = 404

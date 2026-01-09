@@ -1,5 +1,5 @@
 # Makefile for Modular Agentic Monolith
-# Python 3.14 + FastAPI + LangGraph
+# Python 3.12 + FastAPI + LangGraph
 
 .PHONY: help install dev-install clean test test-unit test-e2e lint format typecheck quality run dev docker-up docker-down docker-restart migrate db-shell redis-cli logs smoke-test coverage pre-commit
 
