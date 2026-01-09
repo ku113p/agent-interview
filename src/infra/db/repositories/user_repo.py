@@ -1,20 +1,21 @@
-from uuid import UUID
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.entities.user import UserProfile
 from src.domain.ports.user_repository import UserRepositoryProtocol
-from src.infra.db.models import UserTable
 
 
 class SqlAlchemyUserRepository(UserRepositoryProtocol):
-    """Implementation of the Port using Postgres."""
+    """
+    SQLAlchemy implementation of UserRepository.
+    """
 
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def get_by_id(self, user_id: UUID) -> UserProfile | None:
+    async def get_by_id(self, user_id):
+        from src.infra.db.models import UserTable
+
         query = select(UserTable).where(UserTable.id == user_id)
         result = await self._session.execute(query)
         row = result.scalar_one_or_none()
@@ -25,6 +26,8 @@ class SqlAlchemyUserRepository(UserRepositoryProtocol):
         return self._to_domain(row)
 
     async def get_by_email(self, email: str) -> UserProfile | None:
+        from src.infra.db.models import UserTable
+
         query = select(UserTable).where(UserTable.email == email)
         result = await self._session.execute(query)
         row = result.scalar_one_or_none()
@@ -34,6 +37,8 @@ class SqlAlchemyUserRepository(UserRepositoryProtocol):
         return self._to_domain(row)
 
     async def save(self, user: UserProfile) -> None:
+        from src.infra.db.models import UserTable
+
         record = UserTable(
             id=user.id,
             email=user.email,
@@ -46,7 +51,7 @@ class SqlAlchemyUserRepository(UserRepositoryProtocol):
 
         await self._session.merge(record)
 
-    def _to_domain(self, row: UserTable) -> UserProfile:
+    def _to_domain(self, row):
         return UserProfile(
             id=row.id,
             email=row.email,
