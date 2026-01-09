@@ -13,8 +13,10 @@ class AgentState(TypedDict):
     messages: Annotated[list[dict[str, Any]], add_messages]
 
     user_id: str
+    current_sphere_id: str | None
     plan: PlanSchema | None
     critique: Any | None
+    plan_approved: bool | None  # None = pending, True = approved, False = rejected
 
     step_count: int
     error_count: int

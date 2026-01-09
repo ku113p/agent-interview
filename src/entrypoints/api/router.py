@@ -2,10 +2,16 @@ from typing import Any
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.app.dependencies import get_db_session, get_graph, get_memory_service
+from src.app.dependencies import (
+    get_db_session,
+    get_graph,
+    get_memory_service,
+    get_sphere_repository,
+)
 from src.domain.ports.memory_service import MemoryServiceProtocol
-from src.infra.db.session import AsyncSession
+from src.domain.ports.sphere_repository import SphereRepositoryProtocol
 
 router = APIRouter(prefix="/v1/chat")
 
@@ -27,6 +33,7 @@ async def chat_message(
     graph: Any = Depends(get_graph),  # noqa: B008
     db: AsyncSession = Depends(get_db_session),
     memory: MemoryServiceProtocol = Depends(get_memory_service),
+    sphere_repo: SphereRepositoryProtocol = Depends(get_sphere_repository),
 ) -> ChatResponse:
     """
     Main entrypoint for the agent chat.
@@ -38,6 +45,7 @@ async def chat_message(
         "error_count": 0,
         "last_agent": "start",
         "plan": None,
+        "plan_approved": None,
     }
 
     config = {
@@ -45,6 +53,7 @@ async def chat_message(
             "thread_id": request.thread_id,
             "db_session": db,
             "memory_service": memory,
+            "sphere_repo": sphere_repo,
         }
     }
 
@@ -80,5 +89,6 @@ async def get_state(
     state_snapshot = await graph.aget_state(config)
     if not state_snapshot.values:
         from src.domain.exceptions import ResourceNotFound
+
         raise ResourceNotFound(f"Thread '{thread_id}' not found.")
     return dict(state_snapshot.values)

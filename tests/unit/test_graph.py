@@ -25,6 +25,7 @@ async def test_graph_execution_flow():
         "last_agent": "start",
         "plan": None,
         "critique": None,  # Added to match AgentState
+        "plan_approved": True,  # Skip approval for this test
     }
 
     # config is required for checkpointer

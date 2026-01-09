@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from fastapi.testclient import TestClient
 
-from src.app.dependencies import get_graph
+from src.app.dependencies import get_graph, get_memory_service, get_sphere_repository
 from src.main import app
 
 
@@ -37,6 +37,16 @@ def mock_graph() -> AsyncMock:
 @pytest.fixture
 def client(mock_graph: AsyncMock) -> TestClient:
     """Create test client with mocked dependencies."""
+    from unittest.mock import AsyncMock
+
+    # Mock memory service
+    mock_memory = AsyncMock()
+    app.dependency_overrides[get_memory_service] = lambda: mock_memory
+
+    # Mock sphere repository
+    mock_sphere_repo = AsyncMock()
+    app.dependency_overrides[get_sphere_repository] = lambda: mock_sphere_repo
+
     app.dependency_overrides[get_graph] = lambda: mock_graph
     client = TestClient(app)
     yield client
