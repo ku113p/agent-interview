@@ -5,7 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.ports.memory_service import MemoryServiceProtocol
 from src.domain.ports.sphere_repository import SphereRepositoryProtocol
+from src.domain.ports.user_repository import UserRepositoryProtocol
 from src.infra.db.repositories.sphere_repo import SqlAlchemySphereRepository
+from src.infra.db.repositories.user_repo import SqlAlchemyUserRepository
 from src.infra.db.session import get_db_session
 from src.infra.mem0.client import Mem0MemoryService
 from src.infra.redis import get_redis_client
@@ -36,10 +38,20 @@ def get_sphere_repository(
     return SqlAlchemySphereRepository(session)
 
 
+def get_user_repository(
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> UserRepositoryProtocol:
+    """
+    Dependency that provides an initialized UserRepository.
+    """
+    return SqlAlchemyUserRepository(session)
+
+
 __all__ = [
     "get_graph",
     "get_db_session",
     "get_memory_service",
     "get_sphere_repository",
+    "get_user_repository",
     "get_redis_client",
 ]

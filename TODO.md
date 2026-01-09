@@ -106,19 +106,19 @@
 
 ---
 
-### 5. Memory Integration - Partially Implemented
-**Status**: ⚠️ Partial
+### 5. Memory Integration - Fully Implemented ✅ **COMPLETED**
+**Status**: ✅ **COMPLETED**
 **Impact**: High - Agents require memory to be effective.
-**Description**: `mem0ai` has been integrated as the primary memory service, replacing the previous `RedisMemoryService`. The Architect node now retrieves memories to inform planning.
+**Description**: `mem0ai` has been integrated as the primary memory service, replacing the previous `RedisMemoryService`. The Interviewer node now stores user messages for future retrieval.
 
 **Action Items**:
 - [x] Integrate `mem0ai` library and configure for local Qdrant storage.
 - [x] Implement memory retrieval in Architect node.
 - [x] Add context injection to prompts based on retrieved memories (for Architect).
-- [ ] Implement memory storage in Interviewer node.
-- [ ] Create memory extraction logic from conversations (Handled by `mem0ai`).
-- [ ] Implement importance scoring algorithm (Handled by `mem0ai`).
-- [ ] Add memory pruning/consolidation strategy (Handled by `mem0ai`).
+- [x] Implement memory storage in Interviewer node.
+- [x] Create memory extraction logic from conversations (Handled by `mem0ai`).
+- [x] Implement importance scoring algorithm (Handled by `mem0ai`).
+- [x] Add memory pruning/consolidation strategy (Handled by `mem0ai`).
 
 **Files to Create/Modify**:
 - `src/infra/mem0/client.py` (new)
@@ -157,19 +157,19 @@
 ---
 
 ### 7. User Data Layer (Profiles & Spheres)
-**Status**: ⚠️ Partial
+**Status**: ✅ **COMPLETED**
 **Impact**: High - Core of V2 architecture for organizing data collection.
-**Description**: `UserProfile` and `Sphere` entities and repositories are implemented, but not fully integrated into the agent workflow.
+**Description**: `UserProfile` and `Sphere` entities and repositories are fully implemented and integrated into the agent workflow.
 
 **Action Items**:
 - [x] Implement `Sphere` domain entity and SQLAlchemy repository.
 - [x] Add Sphere repository to dependency injection.
 - [x] Update Architect node to be aware of Spheres.
-- [ ] Create user profile lookup/creation in chat endpoint.
-- [ ] Inject user profile into AgentState.
-- [ ] Use profile data in Architect node planning.
-- [ ] Update profile based on conversation (profession, experience_years).
-- [ ] Add profile and sphere management endpoints (GET/POST/PATCH for users and spheres).
+- [x] Create user profile lookup/creation in chat endpoint.
+- [x] Inject user profile into AgentState.
+- [x] Use profile data in Architect node planning.
+- [x] Update profile based on conversation (profession, experience_years).
+- [x] Add profile and sphere management endpoints (GET/POST/PUT/DELETE for users and spheres).
 
 **Files to Create/Modify**:
 - `src/domain/entities/sphere.py` (created)
