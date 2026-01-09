@@ -77,6 +77,4 @@ src/
 ```
 
 ## 📚 Documentation
-- **Specs**: [Technical Specification](docs/planning/TECHNICAL_SPECIFICATION.md)
-- **Plan**: [Refactoring Plan](docs/planning/REFACTORING_PLAN.md)
-- **Roadmap**: [Roadmap](docs/planning/ROADMAP.md)
+- **Instructions**: [Agent Playbook](docs/planning/README.md)

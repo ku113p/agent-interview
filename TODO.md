@@ -11,7 +11,7 @@
 ### 1. Domain Layer - Exception Hierarchy Missing
 **Status**: ✅ **COMPLETED** (2026-01-06)  
 **Impact**: High - All error handling uses generic exceptions  
-**Description**: The [PATTERNS.md](docs/architecture/PATTERNS.md) and [ARCHITECTURE_DECISIONS.md](docs/architecture/DECISIONS.md) reference a Domain Exception hierarchy, but it doesn't exist in the codebase.
+**Description**: The [PATTERNS](docs/architecture/PATTERNS.md) and [DECISIONS](docs/architecture/DECISIONS.md) reference a Domain Exception hierarchy, but it doesn't exist in the codebase.
 
 **Action Items**:
 - [x] Create `src/domain/exceptions.py` with:
