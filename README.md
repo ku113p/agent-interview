@@ -3,7 +3,7 @@
 ## 🚀 Abstract
 This project implements an **Autonomous Dialogue System** designed for deeply profiling users and collecting their biographies through natural conversation. 
 
-Built with **Python 3.14**, **LangGraph**, and **Mem0**, it features an intelligent agent team that plans interviews, validates answers in real-time, and builds a structured knowledge base of the user's life events.
+Built with **Python 3.12**, **LangGraph**, and **Mem0**, it features an intelligent agent team that plans interviews, validates answers in real-time, and builds a structured knowledge base of the user's life events.
 
 > **Key Capabilities:**
 > - **Long-term Memory:** Uses `Mem0` to remember facts across sessions.
@@ -12,11 +12,12 @@ Built with **Python 3.14**, **LangGraph**, and **Mem0**, it features an intellig
 > - **Multi-Tenancy:** Strict data isolation by user ID.
 
 ## 🛠️ Technology Stack
-- **Language:** Python 3.14 (managed by `uv`)
+- **Language:** Python 3.12 (managed by `uv`)
 - **Orchestration:** LangChain, LangGraph (Stateful Agents)
 - **Memory:** Mem0 (Local Vector Store)
 - **Database:** PostgreSQL/SQLite (Checkpoints & App Data)
 - **Interface:** Telegram Bot API
+- **Observability:** LangFuse (Self-hosted, Docker)
 - **Infrastructure:** Docker (Fully containerized)
 
 ## 🏗️ Architecture
@@ -61,6 +62,8 @@ Copy `.env.example` to `.env` and set your API keys (OpenRouter, Telegram).
 ```bash
 docker-compose up -d
 ```
+
+This starts all services: PostgreSQL, Redis, Qdrant, LangFuse, and the app itself. LangFuse will be available at `http://localhost:3000`.
 
 ## 📂 Project Structure
 ```

@@ -1,6 +1,7 @@
 from typing import Any, TypeVar
 
 import structlog
+from langfuse import observe
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 from tenacity import (
@@ -63,6 +64,7 @@ class SimulatedOpenAIClient(LLMProviderProtocol):
         except Exception as e:
             log.error("llm_call_failed", error=str(e))
             from src.domain.exceptions import LLMError
+
             raise LLMError(f"Simulated LLM call failed: {str(e)}") from e
 
 
@@ -104,6 +106,7 @@ class OpenAIClient(LLMProviderProtocol):
                 formatted.append({"role": "user", "content": str(msg)})
         return formatted
 
+    @observe()
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
@@ -130,8 +133,10 @@ class OpenAIClient(LLMProviderProtocol):
         except Exception as e:
             log.error("llm_call_failed", error=str(e))
             from src.domain.exceptions import LLMError
+
             raise LLMError(f"LLM call failed: {str(e)}") from e
 
+    @observe()
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),

@@ -1,5 +1,5 @@
 services:
-  postgres:
+  app-db:
     image: postgres:16-alpine
     ports:
       - "5432:5432"
@@ -8,9 +8,25 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: interview_db
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - app_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d interview_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  langfuse-db:
+    image: postgres:16-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: langfuse
+      POSTGRES_PASSWORD: langfuse_password
+      POSTGRES_DB: langfuse_db
+    volumes:
+      - langfuse_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U langfuse -d langfuse_db"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -41,15 +57,16 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/interview_db
+      - DATABASE_URL=postgresql://langfuse:langfuse_password@langfuse-db:5432/langfuse_db
       - NEXTAUTH_SECRET=secret
       - SALT=salt
       - NEXTAUTH_URL=http://localhost:3000
     depends_on:
-      postgres:
+      langfuse-db:
         condition: service_healthy
 
 volumes:
-  postgres_data:
+  app_postgres_data:
+  langfuse_postgres_data:
   redis_data:
   qdrant_data:

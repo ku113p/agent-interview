@@ -2,7 +2,7 @@
 
 > **Review Date**: 2026-01-06  
 > **Review Panel**: FAANG Architecture Team Simulation  
-> **Project**: Modular Agentic Monolith (Python 3.14 + LangGraph)  
+> **Project**: Modular Agentic Monolith (Python 3.12 + LangGraph)  
 > **Status**: Production-Ready Architecture with MVP Implementation
 
 ---

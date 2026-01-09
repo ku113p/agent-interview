@@ -2,7 +2,7 @@
 
 > **System:** Modular Agentic Monolith
 > **Architecture:** Hexagonal (Ports & Adapters)
-> **Stack:** Python 3.14, uv, FastAPI, Postgres, Redis.
+> **Stack:** Python 3.12, uv, FastAPI, Postgres, Redis.
 
 **AI AGENT INSTRUCTION:** Review this map before creating files.
 

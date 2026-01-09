@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: SecretStr = Field(default=SecretStr("123:ABC-placeholder"))
     OPENAI_BASE_URL: str | None = Field(default=None)
     MODEL_NAME: str = "openai/gpt-4o-mini"
+
+    LANGFUSE_HOST: str = Field(default="http://localhost:3000")
+    LANGFUSE_PUBLIC_KEY: str = Field(default="pk-lf-placeholder")
+    LANGFUSE_SECRET_KEY: SecretStr = Field(default=SecretStr("sk-lf-placeholder"))
     USE_SIMULATED_LLM: bool = Field(
         default_factory=lambda: "PYTEST_CURRENT_TEST" in os.environ
     )
