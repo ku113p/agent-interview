@@ -1,11 +1,14 @@
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import Depends, Request
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.ports.memory_service import MemoryServiceProtocol
+from src.domain.ports.sphere_repository import SphereRepositoryProtocol
+from src.infra.db.repositories.sphere_repo import SqlAlchemySphereRepository
 from src.infra.db.session import get_db_session
+from src.infra.mem0.client import Mem0MemoryService
 from src.infra.redis import get_redis_client
-from src.infra.vector.memory import RedisMemoryService
 
 
 def get_graph(request: Request) -> Any:
@@ -17,13 +20,26 @@ def get_graph(request: Request) -> Any:
     return request.app.state.graph
 
 
-def get_memory_service(
-    redis=Depends(get_redis_client),
-) -> MemoryServiceProtocol:
+def get_memory_service() -> MemoryServiceProtocol:
     """
-    Dependency that provides an initialized MemoryService.
+    Dependency that provides an initialized Mem0MemoryService.
     """
-    return RedisMemoryService(redis)
+    return Mem0MemoryService()
 
 
-__all__ = ["get_graph", "get_db_session", "get_memory_service", "get_redis_client"]
+def get_sphere_repository(
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> SphereRepositoryProtocol:
+    """
+    Dependency that provides an initialized SphereRepository.
+    """
+    return SqlAlchemySphereRepository(session)
+
+
+__all__ = [
+    "get_graph",
+    "get_db_session",
+    "get_memory_service",
+    "get_sphere_repository",
+    "get_redis_client",
+]

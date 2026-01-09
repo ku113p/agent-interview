@@ -9,7 +9,21 @@ from src.app.graph.nodes.interviewer import interviewer_node
 from src.app.graph.state import AgentState
 
 
-def should_continue(state: AgentState) -> str:
+def should_continue_from_architect(state: AgentState) -> str:
+    """
+    Decides the next step after Architect generates a plan.
+    """
+    plan_approved = state.get("plan_approved")
+
+    if plan_approved is True:
+        return "critic"
+    elif plan_approved is False:
+        return "architect"  # Regenerate plan
+    else:
+        return END  # Wait for approval
+
+
+def should_continue_from_critic(state: AgentState) -> str:
     """
     Decides the next step after the Critic.
     """
@@ -37,11 +51,16 @@ def create_graph(checkpointer: Any = None) -> Any:
     workflow.add_node("interviewer", interviewer_node)
 
     workflow.add_edge(START, "architect")
-    workflow.add_edge("architect", "critic")
+
+    workflow.add_conditional_edges(
+        "architect",
+        should_continue_from_architect,
+        {"critic": "critic", "architect": "architect", END: END},
+    )
 
     workflow.add_conditional_edges(
         "critic",
-        should_continue,
+        should_continue_from_critic,
         {"interviewer": "interviewer", "architect": "architect"},
     )
 

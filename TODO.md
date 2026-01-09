@@ -106,20 +106,22 @@
 
 ---
 
-### 5. Memory Integration - Not Used in Agent Flow
-**Status**: ❌ Not Integrated  
-**Impact**: High - Agents don't retrieve or store memories  
-**Description**: `MemoryFragment` entities and `RedisMemoryService` exist but aren't used in the agent workflow.
+### 5. Memory Integration - Partially Implemented
+**Status**: ⚠️ Partial
+**Impact**: High - Agents require memory to be effective.
+**Description**: `mem0ai` has been integrated as the primary memory service, replacing the previous `RedisMemoryService`. The Architect node now retrieves memories to inform planning.
 
 **Action Items**:
-- [ ] Implement memory retrieval in Architect node
-- [ ] Implement memory storage in Interviewer node
-- [ ] Add context injection to prompts based on retrieved memories
-- [ ] Create memory extraction logic from conversations
-- [ ] Implement importance scoring algorithm
-- [ ] Add memory pruning/consolidation strategy
+- [x] Integrate `mem0ai` library and configure for local Qdrant storage.
+- [x] Implement memory retrieval in Architect node.
+- [x] Add context injection to prompts based on retrieved memories (for Architect).
+- [ ] Implement memory storage in Interviewer node.
+- [ ] Create memory extraction logic from conversations (Handled by `mem0ai`).
+- [ ] Implement importance scoring algorithm (Handled by `mem0ai`).
+- [ ] Add memory pruning/consolidation strategy (Handled by `mem0ai`).
 
 **Files to Create/Modify**:
+- `src/infra/mem0/client.py` (new)
 - `src/app/graph/nodes/architect.py` (add memory retrieval)
 - `src/app/graph/nodes/interviewer.py` (add memory storage)
 - `src/app/services/memory_extractor.py` (new)
@@ -150,22 +152,30 @@
 
 ---
 
-### 7. User Profile Integration - Disconnected from Graph
-**Status**: ⚠️ Partial  
-**Impact**: Medium - Cannot track user career data  
-**Description**: `UserProfile` entity and repository exist but not used anywhere in the flow.
+### 7. User Data Layer (Profiles & Spheres)
+**Status**: ⚠️ Partial
+**Impact**: High - Core of V2 architecture for organizing data collection.
+**Description**: `UserProfile` and `Sphere` entities and repositories are implemented, but not fully integrated into the agent workflow.
 
 **Action Items**:
-- [ ] Create user profile lookup/creation in chat endpoint
-- [ ] Inject user profile into AgentState
-- [ ] Use profile data in Architect node planning
-- [ ] Update profile based on conversation (profession, experience_years)
-- [ ] Add profile management endpoints (GET/PATCH /v1/users/{user_id})
+- [x] Implement `Sphere` domain entity and SQLAlchemy repository.
+- [x] Add Sphere repository to dependency injection.
+- [x] Update Architect node to be aware of Spheres.
+- [ ] Create user profile lookup/creation in chat endpoint.
+- [ ] Inject user profile into AgentState.
+- [ ] Use profile data in Architect node planning.
+- [ ] Update profile based on conversation (profession, experience_years).
+- [ ] Add profile and sphere management endpoints (GET/POST/PATCH for users and spheres).
 
 **Files to Create/Modify**:
+- `src/domain/entities/sphere.py` (created)
+- `src/domain/ports/sphere_repository.py` (created)
+- `src/infra/db/models.py` (updated with SphereTable)
+- `src/infra/db/repositories/sphere_repo.py` (created)
 - `src/entrypoints/api/router.py` (add profile lookup)
-- `src/app/graph/state.py` (add user_profile field)
+- `src/app/graph/state.py` (add user_profile and current_sphere_id fields)
 - `src/entrypoints/api/users.py` (new - user CRUD endpoints)
+- `src/entrypoints/api/spheres.py` (new - sphere CRUD endpoints)
 
 ---
 
@@ -402,8 +412,9 @@
 
 - **Total Items**: 20
 - **Completed (\u2705)**: 2 (10%)
+- **Partial (\u26a0\ufe0f)**: 2 (Memory Integration, User Data Layer)
 - **Critical (\ud83d\udd34)**: 1 remaining (2 completed)
-- **High (\ud83d\udfe0)**: 5
+- **High (\ud83d\udfe0)**: 4 (1 partial)
 - **Medium (\ud83d\udfe1)**: 5
 - **Low (\ud83d\udfe2)**: 7
 
@@ -415,4 +426,4 @@
 
 **Total Remaining**: ~2.5-3 weeks for complete implementation
 
-**Progress**: 2/20 items completed (10%) - \ud83c\udf89 Great start!
+**Progress**: 2/20 items completed, 2 partial (20% effective progress) - \ud83c\udf89 Great start!

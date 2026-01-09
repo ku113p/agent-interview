@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, DateTime, Integer, String
+from sqlalchemy import Boolean, DateTime, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -31,3 +31,26 @@ class UserTable(Base):
 
     def __repr__(self) -> str:
         return f"<UserTable(id={self.id}, email={self.email})>"
+
+
+class SphereTable(Base):
+    """
+    SQL Table for Biography Spheres.
+    Maps to src.domain.entities.sphere.Sphere
+    """
+
+    __tablename__ = "spheres"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(index=True, nullable=False)
+
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String, nullable=False, default="not_started")
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
+
+    def __repr__(self) -> str:
+        return f"<SphereTable(id={self.id}, user_id={self.user_id}, name={self.name})>"

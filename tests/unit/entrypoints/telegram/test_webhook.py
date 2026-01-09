@@ -44,7 +44,7 @@ async def test_process_telegram_update_happy_path():
 
         # Verify Message sent back
         mock_client_instance.send_message.assert_called_once_with(
-            999, "Hello from Agent"
+            999, "Hello from Agent", reply_markup=None
         )
         mock_client_instance.close.assert_called_once()
 
@@ -86,7 +86,7 @@ def test_webhook_endpoint_accepted():
     from src.app.dependencies import get_graph
 
     app = FastAPI()
-    
+
     # We need to override get_graph
     app.dependency_overrides[get_graph] = lambda: AsyncMock()
 

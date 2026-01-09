@@ -30,12 +30,19 @@ class TelegramClient:
         ),
         reraise=True,
     )
-    async def send_message(self, chat_id: int, text: str) -> dict[str, Any]:
+    async def send_message(
+        self,
+        chat_id: int,
+        text: str,
+        reply_markup: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """
-        Sends a text message to a chat.
+        Sends a text message to a chat, optionally with inline keyboard.
         """
         url = f"{self.base_url}/sendMessage"
         payload = {"chat_id": chat_id, "text": text, "parse_mode": "HTML"}
+        if reply_markup:
+            payload["reply_markup"] = reply_markup
 
         try:
             response = await self.client.post(url, json=payload)
@@ -51,6 +58,21 @@ class TelegramClient:
             raise
         except Exception as e:
             logger.error("telegram_send_message_error", error=str(e))
+            raise
+
+    async def answer_callback_query(self, query_id: str) -> dict[str, Any]:
+        """
+        Answers a callback query to remove the loading state from buttons.
+        """
+        url = f"{self.base_url}/answerCallbackQuery"
+        payload = {"callback_query_id": query_id}
+
+        try:
+            response = await self.client.post(url, json=payload)
+            response.raise_for_status()
+            return cast(dict[str, Any], response.json())
+        except Exception as e:
+            logger.error("answer_callback_query_error", error=str(e))
             raise
 
     async def close(self) -> None:
