@@ -26,7 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 - Updated `src/infra/llm/client.py` to use LLMError exceptions
 - Refactored all graph nodes to use externalized prompt templates
-- Updated documentation (TODO.md, REFACTORING_PLAN.md, ARCHITECTURE_DECISIONS.md)
+- Updated documentation (TODO.md, docs/architecture/DECISIONS.md)
 
 ### Metrics
 - Tests: 40/40 passing (100%)
@@ -35,8 +35,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Next Steps
 - See [TODO.md](TODO.md) items #3-7 for upcoming high-priority work
-- See [docs/planning/REFACTORING.md](docs/planning/REFACTORING.md) RA-003 for dependency injection plans
+- See [docs/planning/README.md](docs/planning/README.md) RA-003 for dependency injection plans
 
 ---
 
-*For detailed session notes, see [docs/archive/SESSION_2026-01-06.md](docs/archive/SESSION_2026-01-06.md)*

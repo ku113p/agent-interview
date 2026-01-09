@@ -1,60 +1,41 @@
-Universal Engineering Standards
+# Patterns
 
-> **Level:** Galactic Standard / Staff Engineer +
-> **Philosophy:** "Code is read 10x more often than it is written."
-> **Enforcement:** CI Pipeline fails if these patterns are violated.
-> **Implementation Status**: \u2705 Exception Hierarchy (Pattern #9) | \u2705 Prompt Templates (See renderer.py)
-
-This document contains **Golden Snippets**. Do not reinvent the wheel. Copy, paste, and adapt these patterns. They solve 99% of architectural headaches (race conditions, coupling, untestable code).
+Each pattern below is a precise reminder for agents and humans about how the code must behave. Keep these summaries short, factual, and actionable.
 
 ---
 
-## 1. 🟢 The Domain Entity (The "Pure" Core)
-**Location:** `src/domain/entities/`
-**Rule:** Strict Pydantic V2. **NO** imports from `sqlalchemy`, `fastapi`, or `langchain`. [cite_start]Pure Python only[cite: 42].
-
-```python
-from datetime import datetime, timezone
-from typing import Optional
-from uuid import UUID, uuid4
-from pydantic import BaseModel, Field, field_validator, ConfigDict
-
-class UserProfile(BaseModel):
-    """
-    Aggregate Root for the User Context.
-    Represents the 'Truth' of the business logic.
-    """
-    # Why frozen? Immutability prevents implicit state mutation bugs in async flows.
-    model_config = ConfigDict(frozen=True, from_attributes=True)
-
-    id: UUID = Field(default_factory=uuid4, description="Unique aggregate ID")
-    email: str
-    is_active: bool = True
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    
-    # Optional fields must be explicitly typed as Optional
-    full_name: Optional[str] = None
-
-    @field_validator("email")
-    @classmethod
-    def validate_email_domain(cls, v: str) -> str:
-        """Domain Logic: We don't accept disposable emails."""
-        if "tempmail" in v:
-            raise ValueError("Disposable emails are forbidden by Intergalactic Law.")
-        return v.lower()
-
-    def activate(self) -> "UserProfile":
-        """
-        Pure Domain Method.
-        Returns a NEW instance (Immutability pattern).
-        """
-        return self.model_copy(update={"is_active": True})
-
-```
+## 1. Domain Layer
+- Location: `src/domain/*` (entities, ports, events).
+- Rule: Zero imports from infra, app, or entrypoints. Models must be pure Pydantic V2.
+- Agents: Trust these models for validation and business invariants.
 
 ---
 
-## 2. 🔌 The Port (The Contract)
+## 2. Ports (Protocols)
+- Define contracts (e.g., `UserRepositoryProtocol`, `LLMProviderProtocol`) and nothing else.
+- Infra implements the protocols; graph logic depends on them, not concrete classes.
+
+---
+
+## 3. Application Services & Graph Nodes
+- Services: orchestrate domain + ports; no SQL or network directly.
+- Graph nodes (Architect, Interviewer, Critic) run in `LangGraph.StateGraph` with fixed input/output schemas.
+- Always validate prompt output with typed responses before updating state.
+
+---
+
+## 4. Prompts
+- Stored as Jinja2 templates under `src/app/prompts/*.j2`.
+- Each template renders into a Pydantic schema (Plan, Critique, Response).
+- Version templates via filenames (e.g., `architect_v1.j2`).
+
+---
+
+## 5. Testing
+- Unit tests mock protocols and run in memory (`tests/unit/`).
+- Integration smoke tests (future) should spin up Postgres + Redis via `docker-compose`.
+- Always add `pytest.mark.asyncio` for async logic.
+
 
 **Location:** `src/domain/ports/`
 **Rule:** Use `Protocol` for duck typing. Defines *what* we need, not *how* it works.

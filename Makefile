@@ -268,7 +268,7 @@ docs-serve: ## Serve documentation locally
 	@echo "$(BLUE)Documentation available at:$(NC)"
 	@echo "  $(YELLOW)API Docs: http://localhost:8000/docs$(NC)"
 	@echo "  $(YELLOW)README: README.md$(NC)"
-	@echo "  $(YELLOW)Architecture: ARCHITECTURE_DECISIONS.md$(NC)"
+		@echo "  $(YELLOW)Architecture: docs/architecture/DECISIONS.md$(NC)"
 
 readme: ## Display README
 	@cat README.md

@@ -1,6 +1,6 @@
 # Architecture Decision Records (ADR)
 
-This document serves as the single source of truth for architectural, design, and tooling decisions for the Modular Agentic Monolith project.
+Condense each decision to what matters for running AI agents today: why, what changed, and how to keep stability.
 
 ---
 
