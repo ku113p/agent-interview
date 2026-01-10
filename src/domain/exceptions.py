@@ -46,3 +46,9 @@ class LLMResponseError(LLMError):
     """Raised when the LLM returns an invalid or unexpected response."""
 
     pass
+
+
+class LLMMessageValidationError(LLMError):
+    """Raised when message input validation fails."""
+
+    pass
