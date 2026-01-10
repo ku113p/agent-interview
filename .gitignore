@@ -18,6 +18,7 @@ venv.bak/
 .ruff_cache/
 .pytest_cache/
 .coverage
+.opencode/
 htmlcov/
 dist/
 build/
