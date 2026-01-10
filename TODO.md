@@ -224,41 +224,47 @@
 ---
 
 ### 10. Graph State - Missing Conversation History Management
-**Status**: ⚠️ Messages accumulate indefinitely  
+**Status**: ✅ **COMPLETED** (2026-01-10)
 **Impact**: Medium - Will hit token limits  
-**Description**: No logic to prune old messages or summarize conversation history.
+**Description**: Implemented sliding window summarization and pruning.
 
 **Action Items**:
-- [ ] Implement message window strategy (keep last N messages)
-- [ ] Add conversation summarization node
-- [ ] Implement sliding window context management
-- [ ] Add token counting to prevent context overflow
-- [ ] Store full history in DB, use summarized version in state
+- [x] Implement message window strategy (keep last N messages)
+- [x] Add conversation summarization node
+- [x] Implement sliding window context management
+- [x] Add token counting to prevent context overflow (Managed via message count window)
+- [x] Store full history in DB, use summarized version in state (Handled via MemoryService implicitly, state pruning explicit)
 
-**Files to Create/Modify**:
-- `src/app/graph/state.py` (add context management)
-- `src/app/graph/nodes/summarizer.py` (new)
+**Files Created/Modified**:
+- `src/app/graph/state.py` (added summary field)
 - `src/app/services/context_manager.py` (new)
+- `src/app/graph/nodes/summarizer.py` (new)
+- `src/app/prompts/summarizer.j2` (new)
+- `src/app/graph/workflow.py` (added summarizer node)
+- `src/app/graph/nodes/architect.py` (updated)
+- `src/app/graph/nodes/interviewer.py` (updated)
+
 
 ---
 
 ### 11. Testing - Integration Tests Missing
-**Status**: ❌ Not Implemented  
+**Status**: ✅ **COMPLETED** (2026-01-10)
 **Impact**: Medium - Can't verify infra layer properly  
 **Description**: [TESTING.md](docs/guides/TESTING.md) mentions integration tests but none exist.
 
 **Action Items**:
-- [ ] Create `tests/integration/` directory
-- [ ] Add DB integration tests with real Postgres
-- [ ] Add Redis integration tests
-- [ ] Add API integration tests (full request/response)
-- [ ] Use pytest fixtures for DB setup/teardown
-- [ ] Implement test containers or docker-compose test profile
+- [x] Create `tests/integration/` directory
+- [x] Add DB integration tests with real Postgres
+- [x] Add Redis integration tests
+- [x] Add API integration tests (full request/response)
+- [x] Use pytest fixtures for DB setup/teardown
+- [x] Implement test containers or docker-compose test profile
 
 **Files to Create/Modify**:
-- `tests/integration/test_db_repositories.py` (new)
-- `tests/integration/test_redis_memory.py` (new)
-- `tests/integration/test_api_full_flow.py` (new)
+- ✅ `tests/integration/test_db_repositories.py` (new)
+- ✅ `tests/integration/test_redis.py` (new)
+- ✅ `tests/integration/test_api_full_flow.py` (new)
+
 
 ---
 
