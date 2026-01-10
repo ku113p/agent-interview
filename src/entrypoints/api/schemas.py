@@ -6,9 +6,11 @@ from src.app.schemas import CritiqueSchema, PlanSchema
 
 
 class ChatRequest(BaseModel):
-    user_id: str
-    message: str
-    thread_id: str = "default_thread"
+    user_id: str = Field(..., min_length=1, max_length=100, pattern=r"^[a-zA-Z0-9_-]+$")
+    message: str = Field(..., min_length=1, max_length=4096)
+    thread_id: str = Field(
+        "default_thread", min_length=1, max_length=100, pattern=r"^[a-zA-Z0-9_-]+$"
+    )
 
 
 class ChatResponse(BaseModel):
