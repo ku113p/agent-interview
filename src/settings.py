@@ -31,5 +31,9 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "local"
     LOG_LEVEL: str = "INFO"
 
+    # Context Management
+    CONVERSATION_WINDOW_SIZE: int = 6
+    SUMMARY_THRESHOLD: int = 10
+
 
 settings = Settings()  # type: ignore

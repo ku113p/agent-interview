@@ -19,9 +19,12 @@ async def interviewer_node(state: AgentState, config: RunnableConfig) -> dict[st
     _ = configurable.get("db_session")
     _ = configurable.get("memory_service")
     messages = state["messages"]
+    summary = state.get("summary", "")
 
     system_prompt = render_prompt(
-        "interviewer.j2", context=str(state.get("plan", "No plan established yet."))
+        "interviewer.j2",
+        context=str(state.get("plan", "No plan established yet.")),
+        summary=summary,
     )
 
     response_text = await llm_client.generate_text(

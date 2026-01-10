@@ -40,7 +40,11 @@ line-length = 88
 target-version = "py312"  # Start with 3.12 target for safety
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+extend-select = ["PLR0915"]
 ignore = []
+
+[tool.ruff.lint.pylint]
+max-statements = 25
 [tool.mypy]
 python_version = "3.12" # Mypy execution version
 strict = true

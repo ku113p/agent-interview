@@ -10,6 +10,7 @@ from src.app.prompts.renderer import render_prompt
 from src.app.schemas import PlanSchema
 from src.domain.entities.sphere import Sphere, SphereStatus
 from src.infra.llm.client import get_llm_client
+from src.infra.llm.messages import get_message_content
 
 llm_client = get_llm_client()
 
@@ -79,30 +80,20 @@ async def _extract_sphere_name(
     return None
 
 
-@observe()
-async def architect_node(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
-    """
-    Manages sphere selection and plan generation.
-    """
+def _get_architect_services(config: RunnableConfig) -> tuple[Any, Any, Any]:
+    """Extract services from config."""
     configurable = config.get("configurable", {})
-    db_session = configurable.get("db_session")
-    memory_service = configurable.get("memory_service")
-    sphere_repo = configurable.get("sphere_repo")
+    return (
+        configurable.get("db_session"),
+        configurable.get("memory_service"),
+        configurable.get("sphere_repo"),
+    )
 
-    messages = state["messages"]
-    user_id = state["user_id"]
-    current_sphere_id = state.get("current_sphere_id")
 
-    user_profile = state.get("user_profile")
-    up_data: dict[str, Any]
-    if user_profile is not None and hasattr(user_profile, "model_dump"):
-        up_data = user_profile.model_dump()
-    elif isinstance(user_profile, dict):
-        up_data = user_profile
-    else:
-        up_data = {}
-
-    # Get available spheres
+async def _get_spheres_data(
+    sphere_repo: Any, db_session: Any, user_id: str, current_sphere_id: str | None
+) -> tuple[list[Sphere], str]:
+    """Get all spheres and current sphere name."""
     spheres = []
     current_sphere_name = ""
     if sphere_repo and db_session:
@@ -110,79 +101,72 @@ async def architect_node(state: AgentState, config: RunnableConfig) -> dict[str,
         if current_sphere_id:
             current_sphere = await sphere_repo.get_by_id(UUID(current_sphere_id))
             current_sphere_name = current_sphere.name if current_sphere else ""
+    return spheres, current_sphere_name
 
-    spheres_data = [
-        {"id": s.id, "name": s.name, "status": s.status.value} for s in spheres
-    ]
 
-    # Query memory for context
-    memory_context = ""
+async def _get_memory_context(
+    memory_service: Any, user_id: str, current_sphere_id: str | None
+) -> str:
+    """Get recent memories if in a sphere."""
     if memory_service and current_sphere_id:
         try:
-            memories = await memory_service.search(
-                "", user_id, limit=5
-            )  # Recent memories
-            memory_context = "\n".join([f"- {m.content}" for m in memories])
+            memories = await memory_service.search("", user_id, limit=5)
+            return "\n".join([f"- {m.content}" for m in memories])
         except Exception:
-            memory_context = "No existing memories found."
+            return "No existing memories found."
+    return ""
 
-    # Extract user request from last message
-    if messages:
-        last_msg = messages[-1]
-        if hasattr(last_msg, "content"):
-            user_request = last_msg.content
-        elif isinstance(last_msg, dict):
-            user_request = last_msg.get("content", str(last_msg))
-        else:
-            user_request = str(last_msg)
-    else:
-        user_request = ""
 
-    system_prompt = render_prompt(
-        "architect.j2",
-        user_profile_json=json.dumps(up_data),
-        spheres_json=json.dumps(spheres_data),
-        current_sphere_name=current_sphere_name,
-        memory_context=memory_context,
-        user_request=user_request,
-    )
+async def _handle_no_sphere(
+    user_request: str,
+    spheres: list[Sphere],
+    sphere_repo: Any,
+    user_id: str,
+    system_prompt: str,
+    messages: list[Any],
+    step_count: int,
+    llm_client: Any,
+) -> dict[str, Any]:
+    """Handle logic when no sphere is currently selected."""
+    # Try to extract sphere name from user input
+    sphere_name = await _extract_sphere_name(user_request, spheres, llm_client)
 
-    # If no sphere selected, handle sphere creation/selection
-    if not current_sphere_id and sphere_repo:
-        # Try to extract sphere name from user input
-        sphere_name = await _extract_sphere_name(user_request, spheres, llm_client)
+    if sphere_name and sphere_repo:
+        # Create new sphere
+        new_sphere = Sphere(
+            user_id=_user_id_to_uuid(user_id),
+            name=sphere_name,
+            status=SphereStatus.NOT_STARTED,
+        )
+        await sphere_repo.save(new_sphere)
 
-        if sphere_name:
-            # Create new sphere
-            new_sphere = Sphere(
-                user_id=_user_id_to_uuid(user_id),
-                name=sphere_name,
-                status=SphereStatus.NOT_STARTED,
-            )
-            await sphere_repo.save(new_sphere)
-
-            response = (
-                f"Great! I've created a new sphere called '{sphere_name}' "
-                "for you. Let's start collecting your biography in this area."
-            )
-            return {
-                "messages": [{"role": "assistant", "content": response}],
-                "current_sphere_id": str(new_sphere.id),
-                "last_agent": "architect",
-                "step_count": state["step_count"] + 1,
-            }
-
-        # No sphere name extracted, respond conversationally
-        response = await llm_client.generate_text(
-            system_prompt=system_prompt,
-            messages=messages,
+        response = (
+            f"Great! I've created a new sphere called '{sphere_name}' "
+            "for you. Let's start collecting your biography in this area."
         )
         return {
             "messages": [{"role": "assistant", "content": response}],
+            "current_sphere_id": str(new_sphere.id),
             "last_agent": "architect",
-            "step_count": state["step_count"] + 1,
+            "step_count": step_count + 1,
         }
 
+    # No sphere name extracted, respond conversationally
+    response = await llm_client.generate_text(
+        system_prompt=system_prompt,
+        messages=messages,
+    )
+    return {
+        "messages": [{"role": "assistant", "content": response}],
+        "last_agent": "architect",
+        "step_count": step_count + 1,
+    }
+
+
+async def _handle_plan_generation(
+    system_prompt: str, messages: list[Any], state: AgentState, llm_client: Any
+) -> dict[str, Any]:
+    """Handle plan generation and approval logic."""
     # Sphere selected, generate plan
     plan = await llm_client.generate(
         system_prompt=system_prompt,
@@ -192,6 +176,8 @@ async def architect_node(state: AgentState, config: RunnableConfig) -> dict[str,
 
     # Check if plan approval is required
     plan_approved = state.get("plan_approved")
+    step_count = state["step_count"]
+
     if plan_approved is None:
         # Plan generated but not approved yet - ask for approval
         approval_message = (
@@ -205,7 +191,7 @@ async def architect_node(state: AgentState, config: RunnableConfig) -> dict[str,
             "plan": plan,  # Store the plan but don't proceed yet
             "messages": [{"role": "assistant", "content": approval_message}],
             "last_agent": "architect",
-            "step_count": state["step_count"] + 1,
+            "step_count": step_count + 1,
             # Don't set plan_approved - wait for user input
         }
 
@@ -215,18 +201,78 @@ async def architect_node(state: AgentState, config: RunnableConfig) -> dict[str,
         return {
             "plan": plan,
             "last_agent": "architect",
-            "step_count": state["step_count"] + 1,
+            "step_count": step_count + 1,
         }
-    else:
-        # Plan rejected - regenerate or ask for clarification
-        rejection_message = (
-            "Plan rejected. Let me create a different approach "
-            "for your biography collection."
+
+    # Plan rejected - regenerate or ask for clarification
+    rejection_message = (
+        "Plan rejected. Let me create a different approach "
+        "for your biography collection."
+    )
+    return {
+        "plan": None,  # Clear the plan
+        "plan_approved": None,  # Reset approval state
+        "messages": [{"role": "assistant", "content": rejection_message}],
+        "last_agent": "architect",
+        "step_count": step_count + 1,
+    }
+
+
+@observe()
+async def architect_node(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
+    """
+    Manages sphere selection and plan generation.
+    """
+    db_session, memory_service, sphere_repo = _get_architect_services(config)
+
+    messages = state["messages"]
+    summary = state.get("summary", "")
+    user_id = state["user_id"]
+    current_sphere_id = state.get("current_sphere_id")
+
+    # Normalize user profile
+    user_profile = state.get("user_profile")
+    up_data = {}
+    if user_profile is not None and hasattr(user_profile, "model_dump"):
+        up_data = user_profile.model_dump()
+    elif isinstance(user_profile, dict):
+        up_data = user_profile
+
+    # Get spheres and context
+    spheres, current_sphere_name = await _get_spheres_data(
+        sphere_repo, db_session, user_id, current_sphere_id
+    )
+    spheres_data = [
+        {"id": s.id, "name": s.name, "status": s.status.value} for s in spheres
+    ]
+    memory_context = await _get_memory_context(
+        memory_service, user_id, current_sphere_id
+    )
+
+    # Extract user request
+    user_request = get_message_content(messages[-1]) if messages else ""
+
+    system_prompt = render_prompt(
+        "architect.j2",
+        user_profile_json=json.dumps(up_data),
+        spheres_json=json.dumps(spheres_data),
+        current_sphere_name=current_sphere_name,
+        memory_context=memory_context,
+        summary=summary,
+        user_request=user_request,
+    )
+
+    # Delegate based on state
+    if not current_sphere_id:
+        return await _handle_no_sphere(
+            user_request,
+            spheres,
+            sphere_repo,
+            user_id,
+            system_prompt,
+            messages,
+            state["step_count"],
+            llm_client,
         )
-        return {
-            "plan": None,  # Clear the plan
-            "plan_approved": None,  # Reset approval state
-            "messages": [{"role": "assistant", "content": rejection_message}],
-            "last_agent": "architect",
-            "step_count": state["step_count"] + 1,
-        }
+
+    return await _handle_plan_generation(system_prompt, messages, state, llm_client)
