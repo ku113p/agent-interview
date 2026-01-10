@@ -1,6 +1,7 @@
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from uuid import UUID
 
 from src.domain.entities.user import UserProfile
 from src.domain.ports.user_repository import UserRepositoryProtocol
