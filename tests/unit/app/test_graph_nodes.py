@@ -25,6 +25,7 @@ def mock_state() -> AgentState:
         "last_agent": "start",
         "current_sphere_id": None,
         "plan_approved": None,
+        "summary": "",
     }
 
 
@@ -49,6 +50,9 @@ async def test_architect_node_generates_plan(mock_state, mock_config):
             missing_info=[],
         )
         mock_client.generate = AsyncMock(return_value=mock_plan)
+
+        # Set sphere_id to trigger plan generation path
+        mock_state["current_sphere_id"] = "test-sphere-id"
 
         # Execute
         result = await architect_node(mock_state, mock_config)
@@ -94,6 +98,8 @@ async def test_node_receives_dependencies(mock_state, mock_config):
         mock_critic_client.generate = AsyncMock(
             return_value=CritiqueSchema(is_approved=True, feedback="ok", score=10)
         )
+
+        mock_state["current_sphere_id"] = "test-sphere-id"
 
         await architect_node(mock_state, mock_config)
         await critic_node(mock_state, mock_config)

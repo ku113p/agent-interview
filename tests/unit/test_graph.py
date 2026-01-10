@@ -26,6 +26,7 @@ async def test_graph_execution_flow():
         "plan": None,
         "critique": None,  # Added to match AgentState
         "plan_approved": True,  # Skip approval for this test
+        "current_sphere_id": "test-sphere-id",
     }
 
     # config is required for checkpointer

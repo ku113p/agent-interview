@@ -6,6 +6,7 @@ from langgraph.graph import END, START, StateGraph
 from src.app.graph.nodes.architect import architect_node
 from src.app.graph.nodes.critic import critic_node
 from src.app.graph.nodes.interviewer import interviewer_node
+from src.app.graph.nodes.summarizer import summarizer_node
 from src.app.graph.state import AgentState
 
 
@@ -44,11 +45,14 @@ def create_graph(checkpointer: Any = None) -> Any:
     """
     workflow = StateGraph(AgentState)
 
+    workflow.add_node("summarizer", summarizer_node)
     workflow.add_node("architect", architect_node)
     workflow.add_node("critic", critic_node)
     workflow.add_node("interviewer", interviewer_node)
 
-    workflow.add_edge(START, "architect")
+    # Start with summarizer to check message history
+    workflow.add_edge(START, "summarizer")
+    workflow.add_edge("summarizer", "architect")
 
     workflow.add_conditional_edges(
         "architect",

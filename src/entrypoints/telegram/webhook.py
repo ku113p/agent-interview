@@ -11,6 +11,40 @@ logger = structlog.get_logger()
 router = APIRouter(prefix="/telegram")
 
 
+async def _process_approval_action(
+    graph: Any, thread_id: str, plan_approved: bool
+) -> str:
+    """Process plan approval action and run graph."""
+    config = {"configurable": {"thread_id": thread_id}}
+    current_state = await graph.aget_state(config)
+
+    if not current_state.values:
+        return "Error: No active conversation found."
+
+    # Update state
+    updated_state = current_state.values.copy()
+    updated_state["plan_approved"] = plan_approved
+    updated_state["messages"] = updated_state.get("messages", []) + [
+        {
+            "role": "user",
+            "content": f"Plan {'approved' if plan_approved else 'rejected'}",
+        }
+    ]
+
+    # Continue graph
+    final_state = await graph.ainvoke(updated_state, config=config)
+    messages = final_state.get("messages", [])
+
+    if messages:
+        last_msg = messages[-1]
+        if isinstance(last_msg, dict):
+            return str(last_msg.get("content", ""))
+        elif hasattr(last_msg, "content"):
+            return str(last_msg.content)
+
+    return "Plan processed."
+
+
 async def _handle_callback_query(
     callback_query: dict[str, Any], graph: Any, client: TelegramClient
 ) -> None:
@@ -27,52 +61,60 @@ async def _handle_callback_query(
     thread_id = f"telegram_{user_id}"
 
     try:
-        # Answer the callback query first
         await client.answer_callback_query(query_id)
-
-        # Update state based on approval/rejection
-        plan_approved = data == "approve"
-
-        # Get current state
-        config = {"configurable": {"thread_id": thread_id}}
-        current_state = await graph.aget_state(config)
-
-        if not current_state.values:
-            logger.warning("no_state_found_for_thread", thread_id=thread_id)
-            return
-
-        # Update plan_approved
-        updated_state = current_state.values.copy()
-        updated_state["plan_approved"] = plan_approved
-        updated_state["messages"] = updated_state.get("messages", []) + [
-            {
-                "role": "user",
-                "content": f"Plan {'approved' if plan_approved else 'rejected'}",
-            }
-        ]
-
-        # Continue the graph
-        final_state = await graph.ainvoke(updated_state, config=config)
-
-        # Send response
-        messages = final_state.get("messages", [])
-        response_text = "Plan processed."
-
-        if messages:
-            last_msg = messages[-1]
-            content = ""
-            if isinstance(last_msg, dict):
-                content = last_msg.get("content", "")
-            elif hasattr(last_msg, "content"):
-                content = last_msg.content
-
-            if content:
-                response_text = str(content)
-
+        response_text = await _process_approval_action(
+            graph, thread_id, data == "approve"
+        )
         await client.send_message(chat_id, response_text)
 
     except Exception as e:
         logger.exception("callback_query_processing_error", error=str(e))
+
+
+async def _process_chat_message(
+    graph: Any, thread_id: str, user_id: int, text: str
+) -> tuple[str, dict[str, Any] | None]:
+    """Run graph for chat message and return response text and markup."""
+    input_state = {
+        "messages": [{"role": "user", "content": text}],
+        "user_id": str(user_id),
+        "step_count": 0,
+        "error_count": 0,
+        "last_agent": "start",
+        "plan": None,
+        "plan_approved": None,
+        "summary": "",
+        "critique": None,
+        "current_sphere_id": None,
+    }
+    config = {"configurable": {"thread_id": thread_id}}
+
+    final_state = await graph.ainvoke(input_state, config=config)
+    messages = final_state.get("messages", [])
+    response_text = "I'm having trouble thinking of a response."
+
+    if messages:
+        last_msg = messages[-1]
+        content = ""
+        if isinstance(last_msg, dict):
+            content = last_msg.get("content", "")
+        elif hasattr(last_msg, "content"):
+            content = last_msg.content
+        if content:
+            response_text = str(content)
+
+    reply_markup = None
+    if "Would you like to proceed with this plan" in response_text:
+        reply_markup = {
+            "inline_keyboard": [
+                [
+                    {"text": "✅ Approve", "callback_data": "approve"},
+                    {"text": "❌ Reject", "callback_data": "reject"},
+                ]
+            ]
+        }
+
+    return response_text, reply_markup
 
 
 async def process_telegram_update(data: dict[str, Any], graph: Any) -> None:
@@ -82,13 +124,11 @@ async def process_telegram_update(data: dict[str, Any], graph: Any) -> None:
     client = TelegramClient(settings.TELEGRAM_BOT_TOKEN)
 
     try:
-        # Handle callback queries (button presses)
         callback_query = data.get("callback_query")
         if callback_query:
             await _handle_callback_query(callback_query, graph, client)
             return
 
-        # Extract message info
         message = data.get("message")
         if not message:
             logger.warning("telegram_update_no_message", data=data)
@@ -102,10 +142,7 @@ async def process_telegram_update(data: dict[str, Any], graph: Any) -> None:
             logger.info("telegram_update_ignored_no_text", chat_id=chat_id)
             return
 
-        # Map Telegram user to internal thread
-        # We prefix with 'telegram_' to avoid collision with other sources
         thread_id = f"telegram_{user_id}"
-
         logger.info(
             "processing_telegram_message",
             chat_id=chat_id,
@@ -113,53 +150,9 @@ async def process_telegram_update(data: dict[str, Any], graph: Any) -> None:
             thread_id=thread_id,
         )
 
-        # Prepare graph input
-        input_state = {
-            "messages": [{"role": "user", "content": text}],
-            "user_id": str(user_id),
-            "step_count": 0,
-            "error_count": 0,
-            "last_agent": "start",
-            "plan": None,
-            "plan_approved": None,
-        }
-
-        config = {"configurable": {"thread_id": thread_id}}
-
-        # Invoke graph
-        # Note: In a real prod scenario, we might want to offload this to a worker queue
-        # (Celery/Arq) because Telegram has a timeout for webhooks.
-        # For now, BackgroundTasks is a good middle ground.
-        final_state = await graph.ainvoke(input_state, config=config)
-
-        # Extract response
-        messages = final_state.get("messages", [])
-        response_text = "I'm having trouble thinking of a response."
-
-        if messages:
-            last_msg = messages[-1]
-            content = ""
-            if isinstance(last_msg, dict):
-                content = last_msg.get("content", "")
-            elif hasattr(last_msg, "content"):
-                content = last_msg.content
-
-            if content:
-                response_text = str(content)
-
-        # Check if this is a plan approval request
-        reply_markup = None
-        if "Would you like to proceed with this plan" in response_text:
-            reply_markup = {
-                "inline_keyboard": [
-                    [
-                        {"text": "✅ Approve", "callback_data": "approve"},
-                        {"text": "❌ Reject", "callback_data": "reject"},
-                    ]
-                ]
-            }
-
-        # Send back to Telegram
+        response_text, reply_markup = await _process_chat_message(
+            graph, thread_id, user_id, text
+        )
         await client.send_message(chat_id, response_text, reply_markup=reply_markup)
 
     except Exception as e:

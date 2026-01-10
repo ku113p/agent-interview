@@ -11,6 +11,7 @@ class AgentState(TypedDict):
     """
 
     messages: Annotated[list[dict[str, Any]], add_messages]
+    summary: str
 
     user_id: str
     current_sphere_id: str | None
