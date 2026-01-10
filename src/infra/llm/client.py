@@ -1,4 +1,4 @@
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 import structlog
 from langfuse import observe
@@ -11,6 +11,7 @@ from tenacity import (
 )
 
 from src.domain.ports.llm_provider import LLMProviderProtocol
+from src.infra.llm.messages import convert_to_openai_messages
 from src.settings import settings
 
 logger = structlog.get_logger()
@@ -51,11 +52,13 @@ class SimulatedOpenAIClient(LLMProviderProtocol):
 
         try:
             if schema.__name__ == "CritiqueSchema":
+                # Mock CritiqueSchema for testing flows
                 return schema.model_construct(
                     is_approved=True, feedback="Mock feedback", score=10
                 )
 
             if schema.__name__ == "PlanSchema":
+                # Mock PlanSchema for testing flows
                 return schema.model_construct(
                     goal_analysis="Mock analysis", steps=[], missing_info=[]
                 )
@@ -80,32 +83,6 @@ class OpenAIClient(LLMProviderProtocol):
         )
         self.model = settings.MODEL_NAME
 
-    def _convert_messages(self, messages: list[Any]) -> list[dict[str, str]]:
-        """Converts diverse message formats to OpenAI dict format."""
-        formatted = []
-        for msg in messages:
-            if isinstance(msg, dict):
-                formatted.append(msg)
-            elif hasattr(msg, "content") and hasattr(msg, "type"):
-                # LangChain BaseMessage support
-                role = "user"
-                if msg.type == "human":
-                    role = "user"
-                elif msg.type == "ai":
-                    role = "assistant"
-                elif msg.type == "system":
-                    role = "system"
-                elif msg.type == "chat":
-                    role = "user"  # Fallback
-                elif msg.type == "tool":
-                    role = "tool"
-
-                formatted.append({"role": role, "content": str(msg.content)})
-            else:
-                # Fallback purely to ensure we send something string-like
-                formatted.append({"role": "user", "content": str(msg)})
-        return formatted
-
     @observe()
     @retry(
         stop=stop_after_attempt(3),
@@ -119,7 +96,8 @@ class OpenAIClient(LLMProviderProtocol):
         log.info("llm_call_start")
 
         # Prepare messages
-        clean_messages = self._convert_messages(messages)
+        clean_messages = convert_to_openai_messages(messages)
+        # Type check hack: OpenAI expects dicts, convert_to_openai_messages returns dicts.
         msgs = [{"role": "system", "content": system_prompt}] + clean_messages
 
         try:
@@ -131,9 +109,12 @@ class OpenAIClient(LLMProviderProtocol):
             log.info("llm_call_success")
             return content
         except Exception as e:
-            log.error("llm_call_failed", error=str(e))
-            from src.domain.exceptions import LLMError
+            from src.domain.exceptions import LLMError, LLMMessageValidationError
 
+            if isinstance(e, LLMMessageValidationError):
+                raise e
+
+            log.error("llm_call_failed", error=str(e))
             raise LLMError(f"LLM call failed: {str(e)}") from e
 
     @observe()
@@ -150,7 +131,7 @@ class OpenAIClient(LLMProviderProtocol):
         )
         log.info("llm_call_start")
 
-        clean_messages = self._convert_messages(messages)
+        clean_messages = convert_to_openai_messages(messages)
         msgs = [{"role": "system", "content": system_prompt}] + clean_messages
         try:
             response = await self.client.beta.chat.completions.parse(
@@ -165,8 +146,16 @@ class OpenAIClient(LLMProviderProtocol):
             log.info("llm_call_success")
             return parsed
         except Exception as e:
+            from src.domain.exceptions import (
+                LLMError,
+                LLMMessageValidationError,
+                LLMResponseError,
+            )
+
+            if isinstance(e, LLMMessageValidationError):
+                raise e
+
             log.error("llm_call_failed", error=str(e))
-            from src.domain.exceptions import LLMError, LLMResponseError
 
             is_parse_error = (
                 "parsing" in str(e).lower()
