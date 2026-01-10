@@ -20,6 +20,7 @@ from src.entrypoints.api.error_handlers import register_error_handlers
 from src.entrypoints.telegram import webhook as webhook_router
 from src.logging import configure_logging
 from src.middleware.correlation import CorrelationIdMiddleware
+from src.middleware.rate_limiter import RateLimitMiddleware
 from src.settings import settings
 
 # Configure logging immediately
@@ -40,6 +41,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(title="Modular Agentic Monolith", version="0.1.0", lifespan=lifespan)
 app.add_middleware(CorrelationIdMiddleware)
+app.add_middleware(
+    RateLimitMiddleware, redis_url=str(settings.REDIS_URL), limit=100, window=60
+)
 register_error_handlers(app)
 
 app.include_router(chat_router.router)
