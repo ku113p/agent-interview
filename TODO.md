@@ -206,20 +206,20 @@
 ---
 
 ### 9. API DTOs - Direct State Exposure
-**Status**: ⚠️ Acceptable but Not Best Practice  
+**Status**: ✅ **COMPLETED** (2026-01-10)
 **Impact**: Medium - Breaks encapsulation  
 **Description**: [PATTERNS.md](docs/architecture/PATTERNS.md) warns against exposing internal state directly. Current API returns raw state snapshot.
 
 **Action Items**:
-- [ ] Create proper DTOs for API responses
-- [ ] Implement `ChatResponse.from_state()` mapper
-- [ ] Create `ThreadStateResponse` for debug endpoint
-- [ ] Hide internal fields (error_count, retry_depth)
-- [ ] Version API responses (v1 prefix)
+- [x] Create proper DTOs for API responses
+- [x] Implement `ChatResponse.from_state()` mapper
+- [x] Create `ThreadStateResponse` for debug endpoint
+- [x] Hide internal fields (error_count, retry_depth)
+- [x] Version API responses (v1 prefix)
 
 **Files to Create/Modify**:
-- `src/entrypoints/api/schemas.py` (new)
-- `src/entrypoints/api/router.py` (use DTOs)
+- ✅ `src/entrypoints/api/schemas.py` (new)
+- ✅ `src/entrypoints/api/router.py` (use DTOs)
 
 ---
 
@@ -416,19 +416,19 @@
 ## 📊 Summary Statistics
 
 - **Total Items**: 20
-- **Completed (✅)**: 5 (25%)
+- **Completed (✅)**: 6 (30%)
 - **Partial (⚠️)**: 2 (Memory Integration, User Data Layer)
 - **Critical (🔴)**: 1 remaining (2 completed)
 - **High (🟠)**: 3 (1 partial, 2 completed)
-- **Medium (🟡)**: 4 remaining (1 completed)
+- **Medium (🟡)**: 3 remaining (2 completed)
 - **Low (🟢)**: 7
 
 **Estimated Implementation Time** (Remaining):
 - Critical: ~7 days (Telegram Integration)
 - High: ~5-6 days
-- Medium: ~3 days
+- Medium: ~2.5 days
 - Low: ~1-2 days
 
-**Total Remaining**: ~1.5 weeks for complete implementation
+**Total Remaining**: ~1.4 weeks for complete implementation
 
-**Progress**: 5/20 items completed, 2 partial (35% effective progress) - 🎉 Configuration Management done!
+**Progress**: 6/20 items completed, 2 partial (40% effective progress) - 🎉 API DTOs done!
