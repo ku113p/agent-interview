@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/v1/spheres", tags=["spheres"])
 async def list_spheres(
     limit: int = 100,
     offset: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """
     List all spheres with pagination.
     """
@@ -49,7 +49,7 @@ async def get_sphere(
 async def list_spheres_for_user(
     user_id: str,
     sphere_repo: Annotated[SphereRepositoryProtocol, Depends(get_sphere_repository)],
-) -> dict:
+) -> dict[str, Any]:
     """
     List all spheres for a specific user.
     """
@@ -67,7 +67,7 @@ async def list_spheres_for_user(
 
 @router.post("/", response_model=Sphere)
 async def create_sphere(
-    sphere_data: dict,
+    sphere_data: dict[str, Any],
     sphere_repo: Annotated[SphereRepositoryProtocol, Depends(get_sphere_repository)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> Sphere:
@@ -106,7 +106,7 @@ async def create_sphere(
 @router.put("/{sphere_id}", response_model=Sphere)
 async def update_sphere(
     sphere_id: str,
-    sphere_data: dict,
+    sphere_data: dict[str, Any],
     sphere_repo: Annotated[SphereRepositoryProtocol, Depends(get_sphere_repository)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> Sphere:
@@ -146,7 +146,7 @@ async def delete_sphere(
     sphere_id: str,
     sphere_repo: Annotated[SphereRepositoryProtocol, Depends(get_sphere_repository)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
-):
+) -> None:
     """
     Delete a sphere.
     """

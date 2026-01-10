@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/v1/users", tags=["users"])
 async def list_users(
     limit: int = 100,
     offset: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """
     List all users with pagination.
     """
@@ -59,10 +59,10 @@ async def get_user_by_email(
 
 @router.post("/")
 async def create_user(
-    user_data: dict,  # Pydantic model could be added later
+    user_data: dict[str, Any],  # Pydantic model could be added later
     user_repo: Annotated[UserRepositoryProtocol, Depends(get_user_repository)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> dict:
+) -> dict[str, Any]:
     """
     Create a new user profile.
     """
@@ -105,10 +105,10 @@ async def create_user(
 @router.put("/{user_id}")
 async def update_user(
     user_id: str,
-    user_data: dict,
+    user_data: dict[str, Any],
     user_repo: Annotated[UserRepositoryProtocol, Depends(get_user_repository)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> dict:
+) -> dict[str, Any]:
     """
     Update an existing user profile.
     """
@@ -161,7 +161,7 @@ async def delete_user(
     user_id: str,
     user_repo: Annotated[UserRepositoryProtocol, Depends(get_user_repository)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
-):
+) -> None:
     """
     Delete a user profile.
     """

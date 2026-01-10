@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from uuid import UUID
 
 from src.domain.entities.user import UserProfile
 from src.domain.ports.user_repository import UserRepositoryProtocol
@@ -13,7 +14,7 @@ class SqlAlchemyUserRepository(UserRepositoryProtocol):
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def get_by_id(self, user_id):
+    async def get_by_id(self, user_id: UUID) -> UserProfile | None:
         from src.infra.db.models import UserTable
 
         query = select(UserTable).where(UserTable.id == user_id)
@@ -51,13 +52,17 @@ class SqlAlchemyUserRepository(UserRepositoryProtocol):
 
         await self._session.merge(record)
 
-    def _to_domain(self, row):
+    def _to_domain(self, row: object) -> UserProfile:
+        from typing import Any
+
+        r: Any = row
+
         return UserProfile(
-            id=row.id,
-            email=row.email,
-            is_active=row.is_active,
-            created_at=row.created_at,
-            full_name=row.full_name,
-            profession=row.profession,
-            experience_years=row.experience_years,
+            id=r.id,
+            email=r.email,
+            is_active=r.is_active,
+            created_at=r.created_at,
+            full_name=r.full_name,
+            profession=r.profession,
+            experience_years=r.experience_years,
         )

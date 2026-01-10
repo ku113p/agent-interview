@@ -44,8 +44,6 @@ def create_graph(checkpointer: Any = None) -> Any:
     """
     workflow = StateGraph(AgentState)
 
-    workflow = StateGraph(AgentState)
-
     workflow.add_node("architect", architect_node)
     workflow.add_node("critic", critic_node)
     workflow.add_node("interviewer", interviewer_node)
