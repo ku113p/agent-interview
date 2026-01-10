@@ -9,19 +9,17 @@ class Settings(BaseSettings):
         env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore"
     )
 
-    DATABASE_URL: PostgresDsn = Field(
-        default="postgresql+asyncpg://user:password@localhost:5432/interview_db"
-    )  # type: ignore
-    REDIS_URL: RedisDsn = Field(default="redis://localhost:6379/0")  # type: ignore
+    DATABASE_URL: PostgresDsn
+    REDIS_URL: RedisDsn
 
-    OPENAI_API_KEY: SecretStr = Field(default=SecretStr("sk-placeholder"))
-    TELEGRAM_BOT_TOKEN: SecretStr = Field(default=SecretStr("123:ABC-placeholder"))
+    OPENAI_API_KEY: SecretStr
+    TELEGRAM_BOT_TOKEN: SecretStr
     OPENAI_BASE_URL: str | None = Field(default=None)
     MODEL_NAME: str = "openai/gpt-4o-mini"
 
     LANGFUSE_HOST: str = Field(default="http://localhost:3000")
-    LANGFUSE_PUBLIC_KEY: str = Field(default="pk-lf-placeholder")
-    LANGFUSE_SECRET_KEY: SecretStr = Field(default=SecretStr("sk-lf-placeholder"))
+    LANGFUSE_PUBLIC_KEY: str
+    LANGFUSE_SECRET_KEY: SecretStr
     USE_SIMULATED_LLM: bool = Field(
         default_factory=lambda: "PYTEST_CURRENT_TEST" in os.environ
     )
@@ -31,4 +29,4 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
 
-settings = Settings()
+settings = Settings()  # type: ignore
