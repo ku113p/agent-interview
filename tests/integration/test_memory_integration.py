@@ -30,6 +30,7 @@ async def test_interviewer_node_can_be_imported():
     # Verify state structure includes expected fields
     state: AgentState = {
         "messages": [],
+        "summary": "",
         "user_id": str(uuid4()),
         "step_count": 0,
         "error_count": 0,
