@@ -24,10 +24,12 @@ def mock_graph() -> AsyncMock:
     # Mock aget_state response
     state_snapshot = MagicMock()
     state_snapshot.values = {
+        "user_id": "test_user",
         "plan": {"goal_analysis": "Test plan", "steps": []},
-        "critique": {"is_approved": True, "score": 10},
+        "critique": {"is_approved": True, "score": 10, "feedback": "Good job"},
         "last_agent": "interviewer",
         "step_count": 3,
+        "messages": [],
     }
     graph.aget_state = AsyncMock(return_value=state_snapshot)
 
@@ -74,9 +76,12 @@ def test_get_state_endpoint_success(client: TestClient) -> None:
     assert response.status_code == 200
     data = response.json()
     assert "plan" in data
-    assert "last_agent" in data
-    assert "last_agent" in data
-    assert data["last_agent"] == "interviewer"
+    # Internal fields should be hidden
+    assert "last_agent" not in data
+    assert "error_count" not in data
+    # Public fields should be present
+    assert data["user_id"] == "test_user"
+    assert data["step_count"] == 3
 
 
 def test_get_state_endpoint_not_found(

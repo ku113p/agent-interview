@@ -1,7 +1,6 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.app.dependencies import (
@@ -12,19 +11,9 @@ from src.app.dependencies import (
 )
 from src.domain.ports.memory_service import MemoryServiceProtocol
 from src.domain.ports.sphere_repository import SphereRepositoryProtocol
+from src.entrypoints.api.schemas import ChatRequest, ChatResponse, ThreadStateResponse
 
 router = APIRouter(prefix="/v1/chat")
-
-
-class ChatRequest(BaseModel):
-    user_id: str
-    message: str
-    thread_id: str = "default_thread"
-
-
-class ChatResponse(BaseModel):
-    response: str
-    step_count: int
 
 
 @router.post("/message", response_model=ChatResponse)
@@ -59,29 +48,14 @@ async def chat_message(
 
     final_state = await graph.ainvoke(input_state, config=config)
 
-    messages = final_state.get("messages", [])
-    if not messages:
-        return ChatResponse(
-            response="No response generated.",
-            step_count=final_state.get("step_count", 0),
-        )
-
-    last_msg = messages[-1]
-    content = last_msg.content if hasattr(last_msg, "content") else str(last_msg)
-
-    if isinstance(last_msg, dict):
-        content = last_msg.get("content", "")
-
-    return ChatResponse(
-        response=str(content), step_count=final_state.get("step_count", 0)
-    )
+    return ChatResponse.from_state(final_state)
 
 
-@router.get("/debug/state/{thread_id}")
+@router.get("/debug/state/{thread_id}", response_model=ThreadStateResponse)
 async def get_state(
     thread_id: str,
     graph: Any = Depends(get_graph),  # noqa: B008
-) -> dict[str, Any]:
+) -> ThreadStateResponse:
     """
     Returns the current state of a thread.
     """
@@ -91,4 +65,6 @@ async def get_state(
         from src.domain.exceptions import ResourceNotFound
 
         raise ResourceNotFound(f"Thread '{thread_id}' not found.")
-    return dict(state_snapshot.values)
+
+    # Convert internal state to public DTO
+    return ThreadStateResponse(**state_snapshot.values)
