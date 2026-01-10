@@ -1,4 +1,4 @@
-from typing import Any, Literal, TypedDict, cast
+from typing import Any, Literal, TypedDict
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
@@ -21,10 +21,12 @@ def convert_to_openai_messages(messages: list[Any]) -> list[OpenAIMessage]:
     1. Dictionaries with 'role' and 'content' keys.
        - 'role' must be one of: 'system', 'user', 'assistant', 'tool'.
     2. LangChain BaseMessage objects (HumanMessage, AIMessage, SystemMessage).
-    3. Objects with 'content' and 'type' attributes (duck typing for LangChain messages).
+    3. Objects with 'content' and 'type' attributes
+       (duck typing for LangChain messages).
 
     Raises:
-        LLMMessageValidationError: If a message cannot be converted or has an invalid role.
+        LLMMessageValidationError:
+            If a message cannot be converted or has an invalid role.
     """
     formatted: list[OpenAIMessage] = []
 

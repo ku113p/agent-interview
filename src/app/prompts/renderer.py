@@ -3,6 +3,8 @@ from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+from src.settings import settings
+
 
 class PromptRenderer:
     def __init__(self, templates_dir: str | Path | None = None):
@@ -10,7 +12,9 @@ class PromptRenderer:
             templates_dir = Path(__file__).parent
 
         self.env = Environment(
-            loader=FileSystemLoader(str(templates_dir)), autoescape=select_autoescape()
+            loader=FileSystemLoader(str(templates_dir)),
+            autoescape=select_autoescape(),
+            auto_reload=(settings.ENVIRONMENT == "local"),
         )
 
     def render(self, template_name: str, **kwargs: Any) -> str:
