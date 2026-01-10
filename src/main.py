@@ -18,7 +18,12 @@ from src.entrypoints.api import spheres as spheres_router
 from src.entrypoints.api import users as users_router
 from src.entrypoints.api.error_handlers import register_error_handlers
 from src.entrypoints.telegram import webhook as webhook_router
+from src.logging import configure_logging
+from src.middleware.correlation import CorrelationIdMiddleware
 from src.settings import settings
+
+# Configure logging immediately
+configure_logging()
 
 
 @asynccontextmanager
@@ -34,6 +39,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(title="Modular Agentic Monolith", version="0.1.0", lifespan=lifespan)
+app.add_middleware(CorrelationIdMiddleware)
 register_error_handlers(app)
 
 app.include_router(chat_router.router)

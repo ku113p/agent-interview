@@ -249,7 +249,7 @@ async def test_user_activation_success():
 ## 7. ⚡ Structlog (The All-Seeing Eye)
 
 **Location:** `src/logging.py`
-**Rule:** Logs must be machine-readable (JSON in prod). Never use `print`.
+**Rule:** Logs must be machine-readable (JSON in prod). Never use `print`. Request IDs are automatically bound by middleware.
 
 ```python
 # BAD ❌
@@ -258,7 +258,8 @@ logger.info(f"User {user_id} failed to login")
 
 # GOOD ✅
 logger.info("login_failed", user_id=str(user_id), reason="invalid_password")
-# Why good? Produces: {"event": "login_failed", "user_id": "...", "reason": "..."}
+# Why good? Produces: {"event": "login_failed", "user_id": "...", "reason": "...", "request_id": "..."}
+# Note: 'request_id' is automatically injected by CorrelationIdMiddleware.
 
 ```
 
