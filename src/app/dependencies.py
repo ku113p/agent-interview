@@ -1,3 +1,4 @@
+from collections.abc import AsyncGenerator
 from typing import Annotated, Any
 
 from fastapi import Depends, Request
@@ -11,6 +12,8 @@ from src.infra.db.repositories.user_repo import SqlAlchemyUserRepository
 from src.infra.db.session import get_db_session
 from src.infra.mem0.client import Mem0MemoryService
 from src.infra.redis import get_redis_client
+from src.services.cost_tracker import CostTrackerService
+from src.settings import settings
 
 
 def get_graph(request: Request) -> Any:
@@ -47,6 +50,17 @@ def get_user_repository(
     return SqlAlchemyUserRepository(session)
 
 
+async def get_cost_tracker() -> AsyncGenerator[CostTrackerService, None]:
+    """
+    Dependency that provides the CostTrackerService and cleans it up.
+    """
+    tracker = CostTrackerService(str(settings.REDIS_URL))
+    try:
+        yield tracker
+    finally:
+        await tracker.close()
+
+
 __all__ = [
     "get_graph",
     "get_db_session",
@@ -54,4 +68,5 @@ __all__ = [
     "get_sphere_repository",
     "get_user_repository",
     "get_redis_client",
+    "get_cost_tracker",
 ]
