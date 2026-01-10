@@ -1,4 +1,4 @@
-from typing import Any, TypeVar, cast
+from typing import TypeVar
 
 import structlog
 from langfuse import observe
@@ -97,8 +97,9 @@ class OpenAIClient(LLMProviderProtocol):
 
         # Prepare messages
         clean_messages = convert_to_openai_messages(messages)
-        # Type check hack: OpenAI expects dicts, convert_to_openai_messages returns dicts.
-        msgs = [{"role": "system", "content": system_prompt}] + clean_messages
+        # Type hack: OpenAI expects dicts, helper returns dicts
+        system_msg = {"role": "system", "content": system_prompt}
+        msgs = [system_msg] + clean_messages
 
         try:
             response = await self.client.chat.completions.create(
