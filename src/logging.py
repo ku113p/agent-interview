@@ -1,4 +1,5 @@
 import logging
+import random
 import sys
 from collections.abc import MutableMapping
 from contextvars import ContextVar
@@ -25,6 +26,28 @@ def add_request_id(
     return event_dict
 
 
+def sampling_processor(
+    logger: Any, method_name: str, event_dict: MutableMapping[str, Any]
+) -> MutableMapping[str, Any]:
+    """
+    Structlog processor that drops INFO/DEBUG logs based on the configured sample rate.
+    WARNING, ERROR, and CRITICAL logs are always preserved.
+    """
+    # If settings.LOG_SAMPLE_RATE is 1.0, we keep everything (optimization)
+    if settings.LOG_SAMPLE_RATE >= 1.0:
+        return event_dict
+
+    # Extract log level (added by previous processor)
+    # Default to "info" if not present (safety fallback)
+    level = event_dict.get("level", "info").lower()
+
+    if level in ("info", "debug"):
+        if random.random() > settings.LOG_SAMPLE_RATE:
+            raise structlog.DropEvent
+
+    return event_dict
+
+
 def configure_logging() -> None:
     """
     Configures structlog and standard logging.
@@ -33,6 +56,7 @@ def configure_logging() -> None:
         structlog.contextvars.merge_contextvars,
         add_request_id,
         structlog.processors.add_log_level,
+        sampling_processor,
         structlog.processors.TimeStamper(fmt="iso"),
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
