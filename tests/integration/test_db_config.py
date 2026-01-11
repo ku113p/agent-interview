@@ -5,6 +5,18 @@ from src.infra.db.session import engine
 from src.settings import settings
 
 
+@pytest.fixture(autouse=True)
+async def cleanup_engine():
+    """
+    Explicitly dispose of the global engine after these tests.
+    Since these tests interact with the global engine (to check configuration),
+    we must ensure its pool is closed before the test loop terminates
+    to avoid 'coroutine was never awaited' warnings.
+    """
+    yield
+    await engine.dispose()
+
+
 @pytest.mark.asyncio
 async def test_db_engine_configuration():
     """
