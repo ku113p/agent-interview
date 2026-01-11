@@ -25,7 +25,7 @@ class ContextManager:
         messages_text = "\n".join(formatted_messages)
 
         system_prompt = render_prompt(
-            "summarizer.j2",
+            "summarizer_v1.j2",
             current_summary=current_summary or "No previous summary.",
             new_messages=messages_text,
         )
