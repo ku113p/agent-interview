@@ -1,5 +1,5 @@
 from collections.abc import Generator
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -119,3 +119,18 @@ def test_chat_message_endpoint_domain_error(
     data = response.json()
     assert data["error"] == "BusinessRuleViolation"
     assert data["message"] == "Too many retries"
+
+
+def test_chat_message_endpoint_profanity(client: TestClient) -> None:
+    """Test that /message rejects profane content."""
+
+    # We patch contains_profanity to ensure it triggers
+    with patch("src.entrypoints.api.router.contains_profanity", return_value=True):
+        response = client.post(
+            "/v1/chat/message",
+            json={"user_id": "test_user", "message": "badword"},
+        )
+
+    assert response.status_code == 400
+    data = response.json()
+    assert data["detail"] == "Message contains inappropriate content."
