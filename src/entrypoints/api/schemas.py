@@ -1,8 +1,9 @@
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from src.app.schemas import CritiqueSchema, PlanSchema
+from src.infra.security.sanitization import sanitize_input
 
 
 class ChatRequest(BaseModel):
@@ -11,6 +12,11 @@ class ChatRequest(BaseModel):
     thread_id: str = Field(
         "default_thread", min_length=1, max_length=100, pattern=r"^[a-zA-Z0-9_-]+$"
     )
+
+    @field_validator("message")
+    @classmethod
+    def validate_message(cls, v: str) -> str:
+        return sanitize_input(v)
 
 
 class ChatResponse(BaseModel):

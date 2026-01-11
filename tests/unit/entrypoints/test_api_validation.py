@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from unittest.mock import AsyncMock
 
 import pytest
@@ -17,7 +18,7 @@ def mock_graph() -> AsyncMock:
 
 
 @pytest.fixture
-def client(mock_graph: AsyncMock) -> TestClient:
+def client(mock_graph: AsyncMock) -> Generator[TestClient, None, None]:
     """Create test client with mocked dependencies."""
     from unittest.mock import AsyncMock
 
@@ -99,3 +100,36 @@ def test_user_id_validation_invalid_chars(client: TestClient) -> None:
     )
     assert response.status_code == 422
     assert "user_id" in response.text
+
+
+def test_chat_message_sanitization_xss(
+    client: TestClient, mock_graph: AsyncMock
+) -> None:
+    """
+    Test that an API request with XSS content is sanitized
+    before being passed to the graph.
+    """
+    xss_payload = "<script>alert(1)</script>"
+
+    response = client.post(
+        "/v1/chat/message",
+        json={
+            "user_id": "test_user",
+            "message": xss_payload,
+            "thread_id": "test_thread",
+        },
+    )
+
+    assert response.status_code == 200
+
+    # Verify what was passed to graph.ainvoke
+    # The first arg to ainvoke is input_state
+    call_args = mock_graph.ainvoke.call_args
+    assert call_args is not None
+
+    input_state = call_args[0][0]
+    last_message = input_state["messages"][-1]["content"]
+
+    # Should be escaped
+    assert "<script>" not in last_message
+    assert "&lt;script&gt;" in last_message
