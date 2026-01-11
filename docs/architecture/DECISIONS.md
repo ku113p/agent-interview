@@ -85,15 +85,7 @@ Condense each decision to what matters for running AI agents today: why, what ch
 
 ### ADR-010: Prompt Injection Defense
 * **Status:** Accepted
-* **Context:** Malicious users may attempt to override agent instructions.
-* **Decision:**
-    1.  [cite_start]**Context Separation:** Isolate user input using delimiters (e.g., XML tags)[cite: 187].
-    2.  [cite_start]**Dual LLM Pattern:** Use a lightweight "censor" model to check inputs before they reach the main Interviewer agent[cite: 188].
-* **Consequences:** Adds a small latency overhead but significantly increases security.
-
-### ADR-011: Prompt Injection Defense
-* **Status:** Accepted
-* [cite_start]**Context:** Malicious users may attempt to override agent instructions (e.g., "Ignore all previous instructions")[cite: 186].
+* **Context:** Malicious users may attempt to override agent instructions (e.g., "Ignore all previous instructions")[cite: 186].
 * **Decision:**
     1.  [cite_start]**Context Separation:** Isolate user input using delimiters (e.g., XML tags like `<user_input>`)[cite: 187].
     2.  [cite_start]**Dual LLM Pattern:** Use a lightweight "censor" model to check inputs for attacks before they reach the main Interviewer agent[cite: 188].
@@ -103,7 +95,7 @@ Condense each decision to what matters for running AI agents today: why, what ch
 
 ## 5. Error Handling \u0026 Maintainability
 
-### ADR-012: Domain Exception Hierarchy
+### ADR-011: Domain Exception Hierarchy
 * **Status:** \u2705 **Implemented** (2026-01-06)
 * **Context:** Generic exceptions (`Exception`, `ValueError`) make it difficult to distinguish business rule violations from infrastructure failures and map errors to appropriate HTTP status codes.
 * **Decision:** 
@@ -118,7 +110,7 @@ Condense each decision to what matters for running AI agents today: why, what ch
     - Enables proper error telemetry and alerting
 * **Implementation:** See `src/domain/exceptions.py`, `src/entrypoints/api/error_handlers.py`
 
-### ADR-013: Externalized Prompt Templates
+### ADR-012: Externalized Prompt Templates
 * **Status:** \u2705 **Implemented** (2026-01-06)
 * **Context:** Hardcoded prompts in Python code make it impossible to iterate on prompt engineering without code changes, preventing A/B testing and versioning.
 * **Decision:**
@@ -138,9 +130,9 @@ Condense each decision to what matters for running AI agents today: why, what ch
 ## 6. Implementation Progress
 
 **Completed ADRs**:
-- \u2705 ADR-001 through ADR-011 (original design)
-- \u2705 ADR-012: Domain Exception Hierarchy
-- \u2705 ADR-013: Externalized Prompt Templates
+- \u2705 ADR-001 through ADR-010 (original design)
+- \u2705 ADR-011: Domain Exception Hierarchy
+- \u2705 ADR-012: Externalized Prompt Templates
 
 **In Progress**: None
 

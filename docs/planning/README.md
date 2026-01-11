@@ -11,10 +11,11 @@ Short guidance for AI agents working in `agent-interview`.
 - Keep the focus on accuracy, observability, and graceful retries.
 
 ## Workflow
-1. Architect composes a plan via LangGraph, then hands the plan to the Interviewer.
-2. Interviewer drives the dialogue, stores memory in Mem0/Redis, and records state updates.
-3. Critic reads the plan/results, approves or pushes control back to the Architect using the LangGraph triad.
-4. Repeat until the profile meets completeness criteria; observe via LangFuse spans and logs.
+1. **Summarizer** compresses conversation history to maintain context window efficiency.
+2. **Architect** composes a plan via LangGraph, then hands the plan to the Critic.
+3. **Critic** reviews the plan for safety and quality.
+4. **Interviewer** drives the dialogue based on the approved plan, stores memory in Mem0/Redis, and records state updates.
+5. Repeat until the profile meets completeness criteria; observe via LangFuse spans and logs.
 
 ## Stack
 - **Language**: Python 3.12 with `uv` package management.

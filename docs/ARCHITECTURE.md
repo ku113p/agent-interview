@@ -37,35 +37,34 @@ graph TD
 The core logic is driven by a state machine (LangGraph). The workflow adapts based on the conversation state.
 
 1.  **Start**: Conversation begins or resumes.
-2.  **Architect**: Analyzes the user's intent, retrieves relevant memories, and checks the user's profile/sphere. It plans the next move.
-3.  **Interviewer**: Generates the actual response, asking questions or providing feedback based on the Architect's plan.
-4.  **Critic** (Optional): Reviews the Interviewer's response for quality and safety before sending it to the user.
-5.  **Summarizer**: Runs periodically to condense long conversation histories into a summary, preventing context window overflow.
+2.  **Summarizer**: Compresses older messages to maintain context window efficiency.
+3.  **Architect**: Analyzes the user's intent, retrieves relevant memories, and checks the user's profile/sphere. It plans the next move.
+4.  **Critic**: Reviews the Architect's plan for safety and quality.
+5.  **Interviewer**: Generates the actual response if the plan is approved.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Architect
-    
+    [*] --> Summarizer
+    Summarizer --> Architect
+
     state Architect {
         [*] --> AnalyzeIntent
         AnalyzeIntent --> RetrieveMemory
         RetrieveMemory --> PlanResponse
     }
     
-    Architect --> Interviewer: Plan Ready
-    Interviewer --> Critic: Draft Response
+    Architect --> Critic: Plan Generated
     
     state Critic {
-        [*] --> ReviewResponse
-        ReviewResponse --> Approved: Quality OK
-        ReviewResponse --> Rejected: Quality Issues
+        [*] --> ReviewPlan
+        ReviewPlan --> Approved: Plan OK
+        ReviewPlan --> Rejected: Plan Issues
     }
     
-    Critic --> End: Approved
-    Critic --> Interviewer: Rejected (Retry)
+    Critic --> Interviewer: Approved
+    Critic --> Architect: Rejected (Retry)
     
-    End --> Summarizer: Check Token Count
-    Summarizer --> [*]
+    Interviewer --> [*]: Send Response
 ```
 
 ## Key Components
@@ -77,8 +76,10 @@ Contains pure Python objects (Entities) and Interfaces (Ports) defining the busi
 
 ### 2. Application Layer (`src/app/`)
 Orchestrates the business logic.
-- **Graph**: Contains the LangGraph workflow and Node definitions.
-- **Services**: `MemoryService`, `ContextManager`.
+- **Graph**: Contains the LangGraph workflow (`src/app/graph/`).
+- **Nodes**: Agent implementations (`src/app/graph/nodes/`).
+- **Services**: `ContextManager`, `CostTracker`.
+- **Prompts**: Jinja2 templates for LLM interaction.
 
 ### 3. Infrastructure Layer (`src/infra/`)
 Implements the interfaces defined in the Domain.

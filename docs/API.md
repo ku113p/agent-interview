@@ -154,6 +154,11 @@ Creates a new sphere and links it to a user.
 
 Returns a list of all spheres associated with a specific user.
 
+### List All Spheres (Stub)
+`GET /v1/spheres/`
+
+*Note: This endpoint is currently a stub and returns an empty list.*
+
 ---
 
 ## 🔌 Integrations
