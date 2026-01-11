@@ -39,7 +39,7 @@
 ### Rate Limiting & Throttling
 - [x] Add per-user quotas
 - [x] Add circuit breaker for LLM budget exceeded
-- [ ] Create admin dashboard for usage monitoring
+- [x] Create admin dashboard for usage monitoring
 
 ### Security & Validation
 - [x] Implement profanity filter

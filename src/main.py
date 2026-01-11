@@ -12,6 +12,7 @@ if sys.platform == "win32":
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 from src.app.graph.workflow import create_graph
+from src.entrypoints.api import admin as admin_router
 from src.entrypoints.api import health as health_router
 from src.entrypoints.api import router as chat_router
 from src.entrypoints.api import spheres as spheres_router
@@ -61,6 +62,7 @@ def create_app() -> FastAPI:
     app.include_router(users_router.router)
     app.include_router(spheres_router.router)
     app.include_router(health_router.router)
+    app.include_router(admin_router.router)
     app.include_router(webhook_router.router)
     return app
 

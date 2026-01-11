@@ -53,5 +53,32 @@ class CostTrackerService:
             "output_tokens": int(output_tokens),
         }
 
+    async def get_bulk_usage(self, user_ids: list[str]) -> dict[str, dict[str, int]]:
+        """
+        Get token usage for multiple users efficiently.
+        Returns a dict mapping user_id to usage stats.
+        """
+        if not user_ids:
+            return {}
+
+        pipe = self.redis.pipeline()
+        for uid in user_ids:
+            base_key = f"usage:user:{uid}"
+            pipe.get(f"{base_key}:input_tokens")
+            pipe.get(f"{base_key}:output_tokens")
+
+        results = await pipe.execute()
+
+        usage_map = {}
+        for i, uid in enumerate(user_ids):
+            # Results come in pairs (input, output)
+            input_tokens = results[i * 2] or 0
+            output_tokens = results[i * 2 + 1] or 0
+            usage_map[uid] = {
+                "input_tokens": int(input_tokens),
+                "output_tokens": int(output_tokens),
+            }
+        return usage_map
+
     async def close(self) -> None:
         await self.redis.aclose()

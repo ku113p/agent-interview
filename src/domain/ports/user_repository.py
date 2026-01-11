@@ -15,6 +15,10 @@ class UserRepositoryProtocol(Protocol):
         """Fetch user by email."""
         ...
 
+    async def list_all(self, limit: int, offset: int) -> list[UserProfile]:
+        """List all users with pagination."""
+        ...
+
     async def save(self, user: UserProfile) -> None:
         """Persist the aggregate state (Upsert)."""
         ...
