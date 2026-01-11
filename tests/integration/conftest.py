@@ -52,3 +52,22 @@ async def redis_client():
     client = Redis.from_url(str(settings.REDIS_URL), decode_responses=True)
     yield client
     await client.aclose()
+
+
+@pytest.fixture(autouse=True)
+def override_db_dependency(db_session):
+    """
+    Globally override the get_db_session dependency for all integration tests.
+    This ensures all tests use the test-scoped session (rollback transaction)
+    instead of the global engine's session, preventing data pollution and
+    orphaned connection warnings.
+    """
+    from src.infra.db.session import get_db_session
+    from src.main import app
+
+    async def _override():
+        yield db_session
+
+    app.dependency_overrides[get_db_session] = _override
+    yield
+    app.dependency_overrides.pop(get_db_session, None)

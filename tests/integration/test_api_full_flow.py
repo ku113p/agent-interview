@@ -3,22 +3,11 @@ from uuid import uuid4
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from src.infra.db.session import get_db_session
 from src.main import app
 
 
-@pytest.fixture
-def override_get_db_session(db_session):
-    async def _override():
-        yield db_session
-
-    app.dependency_overrides[get_db_session] = _override
-    yield
-    app.dependency_overrides.clear()
-
-
 @pytest.mark.asyncio
-async def test_health_check(override_get_db_session):
+async def test_health_check():
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
@@ -28,7 +17,7 @@ async def test_health_check(override_get_db_session):
 
 
 @pytest.mark.asyncio
-async def test_user_creation_flow(override_get_db_session):
+async def test_user_creation_flow():
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
