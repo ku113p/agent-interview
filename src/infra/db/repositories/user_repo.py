@@ -38,6 +38,15 @@ class SqlAlchemyUserRepository(UserRepositoryProtocol):
             return None
         return self._to_domain(row)
 
+    async def list_all(self, limit: int, offset: int) -> list[UserProfile]:
+        from src.infra.db.models import UserTable
+
+        query = select(UserTable).limit(limit).offset(offset)
+        result = await self._session.execute(query)
+        rows = result.scalars().all()
+
+        return [self._to_domain(row) for row in rows]
+
     async def save(self, user: UserProfile) -> None:
         from src.infra.db.models import UserTable
 
