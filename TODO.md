@@ -7,48 +7,22 @@
 
 ## 🟡 Medium Priority
 
-### 1. Performance - Database Connection Pooling
-**Status**: 🟢 Completed
-**Impact**: Low - OK for current scale  
-**Description**: Configured connection pool and monitoring.
-
+### 1. Sphere API Implementation
+**Status**: 🔴 Pending
+**Description**: The `GET /v1/spheres/` endpoint is currently a stub.
 **Action Items**:
-- [x] Configure SQLAlchemy pool size
-- [x] Add connection pool monitoring
-- [x] Tune pool parameters for production
-- [x] Add connection leak detection
-
-**Files to Modify**:
-- `src/infra/db/session.py`
+- [ ] Implement pagination and filtering in `src/entrypoints/api/spheres.py`
 
 ---
 
-## 🔮 Backlog / Future Improvements
+## 🟢 Low Priority / Backlog
 
-### Prompt Engineering
-- [x] Implement prompt versioning strategy (e.g., `architect_v2.j2`)
-- [x] Consider implementing prompt registry for A/B testing
-
-### Telegram Integration
-- [x] Handle Markdown → HTML conversion for responses
-
-
-### Observability & Logging
-- [x] Add sampling for high-volume logs
-
-### Rate Limiting & Throttling
-- [x] Add per-user quotas
-- [x] Add circuit breaker for LLM budget exceeded
-- [x] Create admin dashboard for usage monitoring
-
-### Security & Validation
-- [x] Implement profanity filter
-- [x] Add XSS/injection prevention for user inputs
+### Documentation
+- [ ] Add OpenAPI auto-generation details to README
+- [ ] Document new middleware components
 
 ---
 
 ## 📊 Summary Statistics
-
-- **Active Items**: 1 (Performance)
-- **Backlog Items**: 8
-- **Completed**: Previous milestones archived.
+- **Active Items**: 1 (API)
+- **Completed**: Previous milestones archived (Performance, Security, Observability).

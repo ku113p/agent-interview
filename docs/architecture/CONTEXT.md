@@ -33,7 +33,7 @@
 
 ### 2. 🟡 `src/app` (The Brain)
 
-* **`graph/`**: `state.py` (TypedDict), `nodes/` (Architect, Interviewer).
+* **`graph/`**: `state.py` (TypedDict), `nodes/` (Architect, Interviewer, Critic, Summarizer).
 * **`services/`**: Bridges Domain and Ports.
 * **`prompts/`**: Jinja2 templates.
 

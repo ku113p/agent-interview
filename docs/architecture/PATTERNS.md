@@ -19,7 +19,7 @@ Each pattern below is a precise reminder for agents and humans about how the cod
 
 ## 3. Application Services & Graph Nodes
 - Services: orchestrate domain + ports; no SQL or network directly.
-- Graph nodes (Architect, Interviewer, Critic) run in `LangGraph.StateGraph` with fixed input/output schemas.
+- Graph nodes (Architect, Interviewer, Critic, Summarizer) run in `LangGraph.StateGraph` with fixed input/output schemas.
 - Always validate prompt output with typed responses before updating state.
 
 ---

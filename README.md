@@ -23,25 +23,26 @@ Built with **Python 3.12**, **LangGraph**, and **Mem0**, it features an intellig
 ## 🏗️ Architecture
 The system operates using a role-based agent workflow:
 
-1.  **Gateway (Telegram):** Handles user I/O.
-2.  **Architect (Global Planner):**
+1.  **Gateway (Telegram/API):** Handles user I/O.
+2.  **Summarizer:** Compresses conversation history to manage context window before planning.
+3.  **Architect (Global Planner):**
     -   Manages "Spheres" of life (Childhood, Career, etc.).
     -   Generates interview plans based on existing memory.
     -   Tracks global progress.
-3.  **Session Loop (Interviewer + Critic):**
-    -   **Interviewer:** Conducts the dialogue based on the Architect's plan.
-    -   **Critic:** Validates every user answer for completeness and clarity *before* the conversation moves on.
+4.  **Session Loop (Interviewer + Critic):**
+    -   **Critic:** Validates the plan and safety *before* execution.
+    -   **Interviewer:** Conducts the dialogue based on the Architect's approved plan.
 
 ```mermaid
 graph TD
-    User((User)) <-->|Telegram| Gateway
-    Gateway <--> Arch[Architect]
+    User((User)) <-->|API/Telegram| Gateway
+    Gateway --> Summarizer
+    Summarizer --> Arch[Architect]
     Arch <-->|Read/Write| Mem0[(Mem0 Memory)]
-    Arch -->|Plan| Session[Session Loop]
-    subgraph "Session Loop"
-        Interviewer <--> Critic
-    end
-    Session -->|New Facts| Mem0
+    Arch -->|Plan| Critic
+    Critic -->|Approved| Interviewer
+    Critic -->|Rejected| Arch
+    Interviewer --> Gateway
 ```
 
 ## ⚡ Quick Start
@@ -69,10 +70,14 @@ This starts all services: PostgreSQL, Redis, Qdrant, LangFuse, and the app itsel
 ```
 src/
 ├── app/            
-│   ├── graph/      # LangGraph Workflows (Architect, Interviewer, Critic)
-│   └── nodes/      # Agent implementations
+│   ├── graph/      # LangGraph Workflows (Architect, Interviewer, Critic, Summarizer)
+│   ├── nodes/      # Agent implementations
+│   ├── prompts/    # Jinja2 prompt templates
+│   └── services/   # Application services (ContextManager)
 ├── domain/         # Entities (Sphere, Plan, Profile)
-├── infra/          # Adapters (Mem0, DB, Telegram)
+├── entrypoints/    # API & Telegram handlers
+├── infra/          # Adapters (Mem0, DB, Redis, Security)
+├── middleware/     # Rate limiting & Budgeting
 └── main.py         # Entrypoint
 ```
 
