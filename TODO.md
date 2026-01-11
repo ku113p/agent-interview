@@ -37,8 +37,8 @@
 - [x] Add sampling for high-volume logs
 
 ### Rate Limiting & Throttling
-- [ ] Add per-user quotas
-- [ ] Add circuit breaker for LLM budget exceeded
+- [x] Add per-user quotas
+- [x] Add circuit breaker for LLM budget exceeded
 - [ ] Create admin dashboard for usage monitoring
 
 ### Security & Validation
