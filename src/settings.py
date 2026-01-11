@@ -52,6 +52,11 @@ class Settings(BaseSettings):
     DB_POOL_RECYCLE: int = 1800
     DB_POOL_PRE_PING: bool = True
 
+    # Rate Limiting & Quotas
+    RATE_LIMIT_USER: int = 100  # requests per minute
+    RATE_LIMIT_IP: int = 1000  # requests per minute
+    TOKEN_BUDGET_LIMIT: int = 100_000  # max tokens per user
+
     @classmethod
     def settings_customise_sources(
         cls,

@@ -19,6 +19,7 @@ from src.entrypoints.api import users as users_router
 from src.entrypoints.api.error_handlers import register_error_handlers
 from src.entrypoints.telegram import webhook as webhook_router
 from src.logging import configure_logging
+from src.middleware.budget import BudgetMiddleware
 from src.middleware.correlation import CorrelationIdMiddleware
 from src.middleware.rate_limiter import RateLimitMiddleware
 from src.settings import settings
@@ -39,18 +40,33 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         yield
 
 
-app = FastAPI(title="Modular Agentic Monolith", version="0.1.0", lifespan=lifespan)
-app.add_middleware(CorrelationIdMiddleware)
-app.add_middleware(
-    RateLimitMiddleware, redis_url=str(settings.REDIS_URL), limit=100, window=60
-)
-register_error_handlers(app)
+def create_app() -> FastAPI:
+    app = FastAPI(title="Modular Agentic Monolith", version="0.1.0", lifespan=lifespan)
+    app.add_middleware(CorrelationIdMiddleware)
+    app.add_middleware(
+        BudgetMiddleware,
+        redis_url=str(settings.REDIS_URL),
+        budget_limit=settings.TOKEN_BUDGET_LIMIT,
+    )
+    app.add_middleware(
+        RateLimitMiddleware,
+        redis_url=str(settings.REDIS_URL),
+        limit=settings.RATE_LIMIT_USER,
+        ip_limit=settings.RATE_LIMIT_IP,
+        window=60,
+    )
+    register_error_handlers(app)
 
-app.include_router(chat_router.router)
-app.include_router(users_router.router)
-app.include_router(spheres_router.router)
-app.include_router(health_router.router)
-app.include_router(webhook_router.router)
+    app.include_router(chat_router.router)
+    app.include_router(users_router.router)
+    app.include_router(spheres_router.router)
+    app.include_router(health_router.router)
+    app.include_router(webhook_router.router)
+    return app
+
+
+app = create_app()
+
 
 if __name__ == "__main__":
     import uvicorn
