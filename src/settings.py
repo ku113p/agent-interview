@@ -1,7 +1,13 @@
 import os
 
 from pydantic import Field, PostgresDsn, RedisDsn, SecretStr
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+)
+
+from src.infra.security.source import SecretsSettingsSource
 
 
 class Settings(BaseSettings):
@@ -27,6 +33,9 @@ class Settings(BaseSettings):
         default_factory=lambda: "PYTEST_CURRENT_TEST" in os.environ
     )
 
+    # Security
+    SECRETS_BACKEND: str = "env"
+
     # App Defaults
     ENVIRONMENT: str = "local"
     LOG_LEVEL: str = "INFO"
@@ -34,6 +43,23 @@ class Settings(BaseSettings):
     # Context Management
     CONVERSATION_WINDOW_SIZE: int = 6
     SUMMARY_THRESHOLD: int = 10
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        return (
+            init_settings,
+            SecretsSettingsSource(settings_cls),
+            env_settings,
+            dotenv_settings,
+            file_secret_settings,
+        )
 
 
 settings = Settings()  # type: ignore
