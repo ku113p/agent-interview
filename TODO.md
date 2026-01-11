@@ -30,7 +30,8 @@
 - [ ] Consider implementing prompt registry for A/B testing
 
 ### Telegram Integration
-- [ ] Handle Markdown → HTML conversion for responses
+- [x] Handle Markdown → HTML conversion for responses
+
 
 ### Observability & Logging
 - [ ] Add sampling for high-volume logs
