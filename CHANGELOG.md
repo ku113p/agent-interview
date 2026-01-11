@@ -33,9 +33,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Code Quality: Mypy strict ✅, Ruff ✅  
 - Progress: 2/20 TODO items complete (10%), 2/9 refactorings complete (22%)
 
-### Next Steps
-- See [TODO.md](TODO.md) items #3-7 for upcoming high-priority work
-- See [docs/planning/README.md](docs/planning/README.md) RA-003 for dependency injection plans
+
 
 ---
 
