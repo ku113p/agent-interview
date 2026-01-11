@@ -34,7 +34,7 @@
 
 
 ### Observability & Logging
-- [ ] Add sampling for high-volume logs
+- [x] Add sampling for high-volume logs
 
 ### Rate Limiting & Throttling
 - [ ] Add per-user quotas

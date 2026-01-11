@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     # App Defaults
     ENVIRONMENT: str = "local"
     LOG_LEVEL: str = "INFO"
+    LOG_SAMPLE_RATE: float = Field(default=1.0, ge=0.0, le=1.0)
 
     # Context Management
     CONVERSATION_WINDOW_SIZE: int = 6
