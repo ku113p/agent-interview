@@ -1,28 +1,24 @@
-# 📋 TODO: Improvements & Future Enhancements
+# Project Tasks & Roadmap
 
-> **Status**: Last Updated 2026-01-11
-> **Priority Levels**: 🔴 Critical | 🟠 High | 🟡 Medium | 🟢 Low
+**Source of Truth:** `docs/planning/README.md` (Agent Playbook).
+**Status:** Implementation Phase.
 
----
+## 🟢 Active Tasks (Infrastructure & Domain)
+- [ ] **Infrastructure Setup**:
+- [x] Verify `docker-compose.yml` for Postgres/Redis/LangFuse.
+    - [ ] Run `alembic` migrations for initial schema.
+- [ ] **Domain Core**:
+    - [ ] Verify `UserProfile` and `Sphere` entities match strict Pydantic V2 rules.
+    - [ ] Implement `Memory` entity logic.
 
-## 🟡 Medium Priority
+## 🟡 Next Steps (Agent Implementation)
+- [ ] **Agent Graph**:
+    - [ ] Implement `Summarizer` node logic.
+    - [ ] Implement `Architect` node logic (Prompt Engineering).
+    - [ ] Implement `Critic` node logic.
+    - [ ] Implement `Interviewer` node logic.
 
-### 1. Sphere API Implementation
-**Status**: 🔴 Pending
-**Description**: The `GET /v1/spheres/` endpoint is currently a stub.
-**Action Items**:
-- [ ] Implement pagination and filtering in `src/entrypoints/api/spheres.py`
-
----
-
-## 🟢 Low Priority / Backlog
-
-### Documentation
-- [ ] Add OpenAPI auto-generation details to README
-- [ ] Document new middleware components
-
----
-
-## 📊 Summary Statistics
-- **Active Items**: 1 (API)
-- **Completed**: Previous milestones archived (Performance, Security, Observability).
+## 🔴 Future / Backlog
+- [ ] **Telegram Integration**: Full webhook support.
+- [ ] **Voice Interface**: Audio-to-text input.
+- [ ] **Admin Dashboard**: Web UI for monitoring interviews.

@@ -1,71 +1,38 @@
----
-description: Comprehensive Python development standards using uv, Ruff, Mypy, and LangGraph
-globs: **/*.py
----
+# Coding Standards
 
-# Python Expert Developer Rules
+**Status:** Enforced via CI/CD.
+**Policy:** Strict compliance. No "suggestions".
 
-You are an expert Senior Python Architect. You act as a relentless guardian of code quality, maintainability, and type safety.
+## 1. Python Configuration
+All code must comply with the settings defined in `pyproject.toml`.
 
-## 1. Tooling & Package Management (`uv`)
-- **Dependency Management:**
-  - **NEVER** use `pip`, `poetry`, or `conda`.
-  - ALWAYS use **`uv`** for all package operations.
-    - To add a package: `uv add <package_name>` (use `--dev` for dev dependencies).
-    - To run scripts: `uv run <script.py>` or `uv run pytest`.
-    - To sync environment: `uv sync`.
-- **Environment:**
-    - Assume the project strictly follows `pyproject.toml`.
-    - Do not create `requirements.txt` unless explicitly asked for export.
+| Tool | Setting | Value |
+| :--- | :--- | :--- |
+| **Interpreter** | Python | `3.12+` |
+| **Linter** | Ruff | `line-length = 88` |
+| **Type Checker** | MyPy | `strict = true` |
 
-## 2. Code Quality & Formatting (`Ruff`)
-- **Linter & Formatter:**
-  - Assume **Ruff** is configured for both linting and formatting.
-  - Fix generic linting errors automatically where possible.
-  - Adhere to strict line limits (typically 88 or 100 chars).
-  - Sort imports automatically (Ruff does this, mimic it).
-- **Style:**
-  - Use **Google-style docstrings** for all public classes and methods.
-  - Variables must be descriptive (`user_id` not `uid`).
-  - No magic numbers: extract them to `consts.py` or generic `Final` variables.
+## 2. Strict Typing Rules (MyPy)
+1.  **No `Any`:** Explicitly define types. If you must use `Any` (e.g., for external libraries), you must comment with `# type: ignore` and a justification.
+2.  **Full Signatures:** All functions must return a type.
+    ```python
+    # BAD
+    def process(data): ...
 
-## 3. Strict Typing (`Mypy`)
-- **Strict Mode Compliance:**
-  - Code must be compatible with `mypy --strict`.
-  - **No `Any`:** Explicitly define types. Use `Protocol` for duck typing and `TypedDict` for dict structures.
-  - **Pydantic V2:** Use `pydantic.BaseModel` for all data schemas/DTOs.
-- **Escape Hatches:**
-  - If a type error is technically incorrect or unavoidable (e.g., library limitation), use `# type: ignore[code]` AND add a comment explaining WHY it is safe.
-    - Example: `x = crazy_lib.func()  # type: ignore[no-any-return] # Lib is untyped`
+    # GOOD
+    def process(data: dict[str, str]) -> None: ...
+    ```
+3.  **Pydantic Models:** Use Pydantic V2 models for all data structures passing between layers.
 
-## 4. Architecture & Design Patterns
-- **Separation of Concerns:**
-  - Keep logic decoupled. API handlers should not query DB directly (use Repository pattern).
-- **Functional Core:**
-  - Prefer pure functions where possible. Mutate state only in clearly defined service layers.
-- **Error Handling:**
-  - Create custom exception classes in `exceptions.py`.
-  - Never catch `Exception` broadly without re-raising or logging deeply.
+## 3. Linting Rules (Ruff)
+1.  **Imports:** Sorted automatically (Isort compatible).
+2.  **Complexity:** `max-statements = 25`. If a function is longer, refactor it.
+3.  **Modern Python:** Use new syntax (e.g., `list[str]` instead of `List[str]`, `X | Y` instead of `Union[X, Y]`).
 
-## 5. Testing (pytest)
-- **Test-First Mindset:**
-  - When writing logic, propose or write the test cases immediately.
-  - Use `pytest` fixtures for setup.
-  - Use `asyncio` markers for async tests (`@pytest.mark.asyncio`).
+## 4. Documentation
+1.  **Docstrings:** Required for all public modules, classes, and functions. Use Google Style.
+2.  **Comments:** Explain *WHY*, not *WHAT*.
 
-## 6. Specific Libraries
-- **LangGraph:** Use `StateGraph` for agent flows. Use `TypedDict` for graph state.
-- **SQLAlchemy:** Use 2.0+ syntax (AsyncSession, `select()`). Avoid legacy `session.query()`.
-
-## 7. Workflow Protocol
-1.  **Think:** Briefly analyze the request and required types.
-2.  **Check:** Are there new dependencies? If yes, suggest `uv add`.
-3.  **Code:** Generate strict, fully typed code.
-4.  **Verify:** Mentally check against `mypy` strict rules before outputting.
-
-## 8. Commenting Standards
-- **Conciseness:** Comments must be short and direct.
-- **Why, not What:** Explain *why* code exists, not *what* it does.
-- **No Meta-Commentary:** Avoid conversational comments (e.g., "This logic is for checking X").
-- **Cleanliness:** If a comment makes the code hard to read, refactor the code or shorten the comment.
-- **Docstrings:** Use Google-style docstrings for public interfaces.
+## 5. Architecture Enforcement
+1.  **Domain Isolation:** `src/domain` must NEVER import from `src/infra`, `src/app`, or `src/entrypoints`.
+2.  **Async First:** All I/O bound operations (DB, API) must be `async/await`.

@@ -36,6 +36,10 @@ class Settings(BaseSettings):
     # Security
     SECRETS_BACKEND: str = "env"
 
+    # Vector DB
+    QDRANT_HOST: str = "localhost"
+    QDRANT_PORT: int = 6333
+
     # App Defaults
     ENVIRONMENT: str = "local"
     LOG_LEVEL: str = "INFO"
@@ -75,4 +79,4 @@ class Settings(BaseSettings):
         )
 
 
-settings = Settings()  # type: ignore
+settings = Settings()
