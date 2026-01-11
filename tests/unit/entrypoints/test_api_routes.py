@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -37,7 +38,7 @@ def mock_graph() -> AsyncMock:
 
 
 @pytest.fixture
-def client(mock_graph: AsyncMock) -> TestClient:
+def client(mock_graph: AsyncMock) -> Generator[TestClient, None, None]:
     """Create test client with mocked dependencies."""
     from unittest.mock import AsyncMock
 

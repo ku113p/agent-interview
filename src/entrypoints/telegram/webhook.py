@@ -5,6 +5,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 
 from src.app.dependencies import get_graph
 from src.entrypoints.telegram.client import TelegramClient
+from src.infra.security.sanitization import sanitize_input
 from src.settings import settings
 
 logger = structlog.get_logger()
@@ -141,6 +142,8 @@ async def process_telegram_update(data: dict[str, Any], graph: Any) -> None:
         if not chat_id or not text:
             logger.info("telegram_update_ignored_no_text", chat_id=chat_id)
             return
+
+        text = sanitize_input(text)
 
         thread_id = f"telegram_{user_id}"
         logger.info(

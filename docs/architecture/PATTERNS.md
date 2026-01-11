@@ -462,3 +462,25 @@ class OpenAIClient:
         pass
 
 ```
+
+---
+
+## 14. 🛡️ Security (The Guardrails)
+
+**Location:** `src/infra/security/sanitization.py`
+**Rule:** Trust No One. All external inputs (API payloads, Webhook data) must be sanitized *at the boundary* before reaching business logic or the graph.
+
+```python
+from src.infra.security.sanitization import sanitize_input
+from pydantic import field_validator
+
+class ChatRequest(BaseModel):
+    message: str
+
+    @field_validator("message")
+    @classmethod
+    def validate_message(cls, v: str) -> str:
+        # 1. HTML Escape (<script> -> &lt;script&gt;)
+        # 2. Strip whitespace
+        return sanitize_input(v)
+```

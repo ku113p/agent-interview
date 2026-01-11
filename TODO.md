@@ -43,7 +43,7 @@
 
 ### Security & Validation
 - [ ] Implement profanity filter
-- [ ] Add XSS/injection prevention for user inputs
+- [x] Add XSS/injection prevention for user inputs
 
 ---
 
