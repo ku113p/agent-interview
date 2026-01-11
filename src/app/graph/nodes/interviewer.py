@@ -19,10 +19,12 @@ async def interviewer_node(state: AgentState, config: RunnableConfig) -> dict[st
     _ = configurable.get("db_session")
     _ = configurable.get("memory_service")
     messages = state["messages"]
+    user_id = state.get("user_id")
     summary = state.get("summary", "")
 
     system_prompt = render_prompt(
-        "interviewer_v1.j2",
+        "interviewer",
+        user_id=user_id,
         context=str(state.get("plan", "No plan established yet.")),
         summary=summary,
     )

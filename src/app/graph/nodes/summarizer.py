@@ -41,8 +41,9 @@ async def summarizer_node(state: AgentState, config: RunnableConfig) -> dict[str
 
     try:
         # Generate new summary
+        user_id = state.get("user_id")
         new_summary = await context_manager.summarize_conversation(
-            current_summary, msgs_to_summarize
+            current_summary, msgs_to_summarize, user_id=user_id
         )
 
         # Create delete operations for summarized messages

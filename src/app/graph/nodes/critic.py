@@ -21,6 +21,7 @@ async def critic_node(state: AgentState, config: RunnableConfig) -> dict[str, An
     _ = configurable.get("db_session")
     _ = configurable.get("memory_service")
     messages = state["messages"]
+    user_id = state.get("user_id")
 
     plan = state.get("plan")
     plan_data: dict[str, Any]
@@ -31,7 +32,9 @@ async def critic_node(state: AgentState, config: RunnableConfig) -> dict[str, An
     else:
         plan_data = {}
 
-    system_prompt = render_prompt("critic_v1.j2", plan_json=json.dumps(plan_data))
+    system_prompt = render_prompt(
+        "critic", user_id=user_id, plan_json=json.dumps(plan_data)
+    )
 
     critique = await llm_client.generate(
         system_prompt=system_prompt,

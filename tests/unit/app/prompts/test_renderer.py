@@ -11,6 +11,16 @@ def test_render_prompt_architect():
     assert "test request" in rendered
 
 
+def test_render_prompt_architect_logical_key():
+    rendered = render_prompt(
+        "architect",
+        user_profile_json='{"name": "test"}',
+        user_request="test request",
+    )
+    assert "Architect" in rendered
+    assert "test request" in rendered
+
+
 def test_render_prompt_critic():
     rendered = render_prompt("critic_v1.j2", plan_json="{}")
     assert "Critic" in rendered
