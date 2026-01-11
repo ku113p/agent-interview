@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.app.dependencies import (
@@ -12,6 +12,7 @@ from src.app.dependencies import (
 from src.domain.ports.memory_service import MemoryServiceProtocol
 from src.domain.ports.sphere_repository import SphereRepositoryProtocol
 from src.entrypoints.api.schemas import ChatRequest, ChatResponse, ThreadStateResponse
+from src.infra.security.content_safety import contains_profanity
 
 router = APIRouter(prefix="/v1/chat")
 
@@ -27,6 +28,11 @@ async def chat_message(
     """
     Main entrypoint for the agent chat.
     """
+    if contains_profanity(request.message):
+        raise HTTPException(
+            status_code=400, detail="Message contains inappropriate content."
+        )
+
     input_state = {
         "messages": [{"role": "user", "content": request.message}],
         "user_id": request.user_id,

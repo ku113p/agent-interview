@@ -42,7 +42,7 @@
 - [ ] Create admin dashboard for usage monitoring
 
 ### Security & Validation
-- [ ] Implement profanity filter
+- [x] Implement profanity filter
 - [x] Add XSS/injection prevention for user inputs
 
 ---

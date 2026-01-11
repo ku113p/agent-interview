@@ -5,6 +5,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 
 from src.app.dependencies import get_graph
 from src.entrypoints.telegram.client import TelegramClient
+from src.infra.security.content_safety import contains_profanity
 from src.infra.security.sanitization import sanitize_input
 from src.settings import settings
 
@@ -118,6 +119,20 @@ async def _process_chat_message(
     return response_text, reply_markup
 
 
+def _extract_message_data(
+    data: dict[str, Any],
+) -> tuple[int | None, int | None, str | None]:
+    """Extract chat_id, user_id, and text from message data."""
+    message = data.get("message")
+    if not message:
+        return None, None, None
+
+    chat_id = message.get("chat", {}).get("id")
+    user_id = message.get("from", {}).get("id")
+    text = message.get("text")
+    return chat_id, user_id, text
+
+
 async def process_telegram_update(data: dict[str, Any], graph: Any) -> None:
     """
     Background task to process the telegram update and send a response.
@@ -130,20 +145,25 @@ async def process_telegram_update(data: dict[str, Any], graph: Any) -> None:
             await _handle_callback_query(callback_query, graph, client)
             return
 
-        message = data.get("message")
-        if not message:
-            logger.warning("telegram_update_no_message", data=data)
-            return
+        chat_id, user_id, text = _extract_message_data(data)
 
-        chat_id = message.get("chat", {}).get("id")
-        user_id = message.get("from", {}).get("id")
-        text = message.get("text")
-
-        if not chat_id or not text:
-            logger.info("telegram_update_ignored_no_text", chat_id=chat_id)
+        if not chat_id or not text or not user_id:
+            logger.info("telegram_update_ignored_no_text", data=data)
             return
 
         text = sanitize_input(text)
+
+        if contains_profanity(text):
+            logger.warning(
+                "profanity_detected_telegram",
+                user_id=user_id,
+                chat_id=chat_id,
+                text=text,
+            )
+            await client.send_message(
+                chat_id, "I cannot process messages containing profanity."
+            )
+            return
 
         thread_id = f"telegram_{user_id}"
         logger.info(

@@ -78,6 +78,42 @@ async def test_process_telegram_update_no_text():
         mock_client_instance.close.assert_called_once()
 
 
+@pytest.mark.asyncio
+async def test_process_telegram_update_profanity():
+    mock_graph = AsyncMock()
+
+    with patch("src.entrypoints.telegram.webhook.TelegramClient") as MockClientClass:
+        mock_client_instance = MockClientClass.return_value
+        mock_client_instance.send_message = AsyncMock()
+        mock_client_instance.close = AsyncMock()
+
+        update_data = {
+            "update_id": 125,
+            "message": {
+                "message_id": 3,
+                "from": {"id": 999},
+                "chat": {"id": 999},
+                "text": "This is offensive badword",
+            },
+        }
+
+        with patch(
+            "src.entrypoints.telegram.webhook.contains_profanity", return_value=True
+        ):
+            await process_telegram_update(update_data, mock_graph)
+
+        # Graph should NOT be called
+        mock_graph.ainvoke.assert_not_called()
+
+        # Rejection message sent
+        mock_client_instance.send_message.assert_called_once_with(
+            999, "I cannot process messages containing profanity."
+        )
+
+        # Client closed
+        mock_client_instance.close.assert_called_once()
+
+
 # API Endpoint Test
 # API Endpoint Test
 def test_webhook_endpoint_accepted():
