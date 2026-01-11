@@ -3,6 +3,7 @@ from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+from src.app.prompts.registry import PromptRegistry
 from src.settings import settings
 
 
@@ -17,8 +18,11 @@ class PromptRenderer:
             auto_reload=(settings.ENVIRONMENT == "local"),
         )
 
-    def render(self, template_name: str, **kwargs: Any) -> str:
-        template = self.env.get_template(template_name)
+    def render(
+        self, template_name: str, user_id: str | None = None, **kwargs: Any
+    ) -> str:
+        actual_template = PromptRegistry.get_template_path(template_name, user_id)
+        template = self.env.get_template(actual_template)
         return template.render(**kwargs)
 
 
@@ -26,5 +30,5 @@ class PromptRenderer:
 renderer = PromptRenderer()
 
 
-def render_prompt(template_name: str, **kwargs: Any) -> str:
-    return renderer.render(template_name, **kwargs)
+def render_prompt(template_name: str, user_id: str | None = None, **kwargs: Any) -> str:
+    return renderer.render(template_name, user_id=user_id, **kwargs)

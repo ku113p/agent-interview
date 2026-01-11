@@ -253,7 +253,8 @@ async def architect_node(state: AgentState, config: RunnableConfig) -> dict[str,
     user_request = get_message_content(messages[-1]) if messages else ""
 
     system_prompt = render_prompt(
-        "architect_v1.j2",
+        "architect",
+        user_id=user_id,
         user_profile_json=json.dumps(up_data),
         spheres_json=json.dumps(spheres_data),
         current_sphere_name=current_sphere_name,

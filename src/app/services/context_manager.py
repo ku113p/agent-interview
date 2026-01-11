@@ -10,7 +10,7 @@ class ContextManager:
         self.llm_client = llm_client
 
     async def summarize_conversation(
-        self, current_summary: str, messages: list[Any]
+        self, current_summary: str, messages: list[Any], user_id: str | None = None
     ) -> str:
         """
         Generates a new summary by combining the existing summary with new messages.
@@ -25,7 +25,8 @@ class ContextManager:
         messages_text = "\n".join(formatted_messages)
 
         system_prompt = render_prompt(
-            "summarizer_v1.j2",
+            "summarizer",
+            user_id=user_id,
             current_summary=current_summary or "No previous summary.",
             new_messages=messages_text,
         )
