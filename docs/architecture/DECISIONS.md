@@ -36,12 +36,12 @@ Condense each decision to what matters for running AI agents today: why, what ch
 
 ### ADR-004: Polyglot Persistence (Hybrid Memory)
 * **Status:** Accepted
-* [cite_start]**Context:** Different types of human memory (semantic vs. episodic vs. factual) require different storage engines for efficient retrieval[cite: 97].
+* **Context:** Different types of human memory (semantic vs. episodic vs. factual) require different storage engines for efficient retrieval.
 * **Decision:**
-    1.  [cite_start]**PostgreSQL (Relational):** For core profile attributes, strict schemas, and critical business data[cite: 108, 112].
-    2.  [cite_start]**Redis (Vector):** For semantic search, associative memory, and caching embeddings[cite: 51, 98].
-    3.  [cite_start]**JSON-LD:** Use Linked Data standards for ontology to ensure semantic context for all data fields[cite: 115].
-* [cite_start]**Consequences:** Requires implementation of "Dual-Write" logic to ensure facts are saved to both Postgres (reliability) and Redis (search)[cite: 52].
+    1.  **PostgreSQL (Relational):** For core profile attributes, strict schemas, and critical business data.
+    2.  **Mem0 (Vector/Semantic):** For semantic search and memory consolidation. Wraps Qdrant/Vector DB.
+    3.  **Redis (Cache):** For transient state and caching.
+* **Consequences:** We leverage Mem0's higher-level abstractions for user memory rather than raw vector operations.
 
 ### ADR-005: Strict Data Validation
 * **Status:** Accepted

@@ -15,15 +15,19 @@ graph TD
         API -->|Invokes| Graph[Agent Graph (LangGraph)]
         
         subgraph Graph_Nodes
-            Architect[Architect Node]
-            Interviewer[Interviewer Node]
-            Critic[Critic Node]
             Summarizer[Summarizer Node]
+            Architect[Architect Node]
+            Critic[Critic Node]
+            Interviewer[Interviewer Node]
         end
         
-        Graph --> Architect
-        Architect --> Interviewer
-        Interviewer --> Critic
+        Graph --> Summarizer
+        Summarizer --> Architect
+        Architect -->|Plan Approved?| Critic
+        Architect -->|Wait for User| End([END])
+        Critic -->|Approved| Interviewer
+        Critic -->|Rejected| Architect
+        Interviewer --> End
     end
 
     subgraph Infrastructure
@@ -36,11 +40,16 @@ graph TD
 ## Agent Graph Workflow
 The core logic is driven by a state machine (LangGraph). The workflow adapts based on the conversation state.
 
-1.  **Start**: Conversation begins or resumes.
-2.  **Summarizer**: Compresses older messages to maintain context window efficiency.
-3.  **Architect**: Analyzes the user's intent, retrieves relevant memories, and checks the user's profile/sphere. It plans the next move.
-4.  **Critic**: Reviews the Architect's plan for safety and quality.
-5.  **Interviewer**: Generates the actual response if the plan is approved.
+1.  **Summarizer**: Compresses older messages to maintain context window efficiency. Always runs first.
+2.  **Architect**: Analyzes the user's intent, retrieves relevant memories, and checks the user's profile/sphere.
+    *   *No Sphere*: Creates a new sphere.
+    *   *Plan Needed*: Generates a plan and halts for **User Approval** (`END`).
+    *   *Plan Approved*: Proceeds to Critic.
+    *   *Plan Rejected*: Regenerates plan.
+3.  **Critic**: Reviews the Architect's plan for safety and quality.
+    *   *Critique Pass*: Proceeds to Interviewer.
+    *   *Critique Fail*: Sends back to Architect (Retry Loop).
+4.  **Interviewer**: Generates the actual response using the approved plan.
 
 ```mermaid
 stateDiagram-v2
@@ -53,7 +62,9 @@ stateDiagram-v2
         RetrieveMemory --> PlanResponse
     }
     
-    Architect --> Critic: Plan Generated
+    Architect --> Critic: Plan Approved (True)
+    Architect --> Architect: Plan Rejected (False)
+    Architect --> [*]: Plan Created (Wait for User)
     
     state Critic {
         [*] --> ReviewPlan
