@@ -16,7 +16,7 @@ def jinja_env() -> Environment:
 
 def test_architect_template_renders_with_valid_data(jinja_env: Environment) -> None:
     """Test that architect template renders correctly with valid data."""
-    template = jinja_env.get_template("architect.j2")
+    template = jinja_env.get_template("architect_v1.j2")
 
     user_profile = {"name": "John Doe", "profession": "Software Engineer"}
     rendered = template.render(
@@ -31,7 +31,7 @@ def test_architect_template_renders_with_valid_data(jinja_env: Environment) -> N
 
 def test_architect_template_handles_empty_profile(jinja_env: Environment) -> None:
     """Test that architect template handles empty profile gracefully."""
-    template = jinja_env.get_template("architect.j2")
+    template = jinja_env.get_template("architect_v1.j2")
 
     rendered = template.render(user_profile_json="{}", user_request="Test request")
 
@@ -41,7 +41,7 @@ def test_architect_template_handles_empty_profile(jinja_env: Environment) -> Non
 
 def test_architect_template_renders_special_characters(jinja_env: Environment) -> None:
     """Test that template handles special characters in user input."""
-    template = jinja_env.get_template("architect.j2")
+    template = jinja_env.get_template("architect_v1.j2")
 
     user_profile = {"name": "User's Name", "skills": "Python & JavaScript"}
     rendered = template.render(
@@ -56,7 +56,7 @@ def test_architect_template_renders_special_characters(jinja_env: Environment) -
 
 def test_critic_template_renders(jinja_env: Environment) -> None:
     """Test that critic template renders correctly."""
-    template = jinja_env.get_template("critic.j2")
+    template = jinja_env.get_template("critic_v1.j2")
     rendered = template.render(plan_json='{"steps": ["A"]}')
     assert "Critic" in rendered
     assert '"steps": ["A"]' in rendered
@@ -64,7 +64,7 @@ def test_critic_template_renders(jinja_env: Environment) -> None:
 
 def test_interviewer_template_renders(jinja_env: Environment) -> None:
     """Test that interviewer template renders correctly."""
-    template = jinja_env.get_template("interviewer.j2")
+    template = jinja_env.get_template("interviewer_v1.j2")
     rendered = template.render(context="Some context")
     assert "Interviewer" in rendered
     assert "Some context" in rendered

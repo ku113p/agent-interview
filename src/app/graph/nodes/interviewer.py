@@ -22,7 +22,7 @@ async def interviewer_node(state: AgentState, config: RunnableConfig) -> dict[st
     summary = state.get("summary", "")
 
     system_prompt = render_prompt(
-        "interviewer.j2",
+        "interviewer_v1.j2",
         context=str(state.get("plan", "No plan established yet.")),
         summary=summary,
     )

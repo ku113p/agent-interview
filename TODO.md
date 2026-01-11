@@ -26,7 +26,7 @@
 ## 🔮 Backlog / Future Improvements
 
 ### Prompt Engineering
-- [ ] Implement prompt versioning strategy (e.g., `architect_v2.j2`)
+- [x] Implement prompt versioning strategy (e.g., `architect_v2.j2`)
 - [ ] Consider implementing prompt registry for A/B testing
 
 ### Telegram Integration

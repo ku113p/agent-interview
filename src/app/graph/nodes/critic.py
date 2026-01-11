@@ -31,7 +31,7 @@ async def critic_node(state: AgentState, config: RunnableConfig) -> dict[str, An
     else:
         plan_data = {}
 
-    system_prompt = render_prompt("critic.j2", plan_json=json.dumps(plan_data))
+    system_prompt = render_prompt("critic_v1.j2", plan_json=json.dumps(plan_data))
 
     critique = await llm_client.generate(
         system_prompt=system_prompt,
