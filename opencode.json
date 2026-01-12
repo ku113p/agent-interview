@@ -19,5 +19,12 @@
       },
       "enabled": true
     }
+  },
+  "agent": {
+    "primary": {
+      "model": "openrouter/google/gemini-3-pro-preview",
+      "temperature": 0.1,
+      "prompt": "{file:docs/guides/RULES.md}"
+    }
   }
 }
