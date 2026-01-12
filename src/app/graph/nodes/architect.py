@@ -10,7 +10,7 @@ from src.app.prompts.renderer import render_prompt
 from src.app.schemas import PlanSchema
 from src.domain.entities.sphere import Sphere, SphereStatus
 from src.infra.llm.client import get_llm_client
-from src.infra.llm.messages import get_message_content
+from src.app.common.messages import get_message_content
 
 llm_client = get_llm_client()
 

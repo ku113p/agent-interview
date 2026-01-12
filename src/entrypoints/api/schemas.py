@@ -57,3 +57,13 @@ class ThreadStateResponse(BaseModel):
     plan_approved: bool | None = None
     step_count: int
     messages: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class UserResponse(BaseModel):
+    id: str
+    email: str
+    is_active: bool
+    created_at: Any
+    full_name: str | None = None
+    profession: str | None = None
+    experience_years: int = 0
