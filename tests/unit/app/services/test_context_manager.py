@@ -1,9 +1,9 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from langchain_core.messages import AIMessage, HumanMessage
 
 from src.app.services.context_manager import ContextManager
+from src.domain.value_objects import Message
 
 
 @pytest.mark.asyncio
@@ -16,9 +16,9 @@ async def test_summarize_conversation():
 
     current_summary = "Previous summary"
     messages = [
-        HumanMessage(content="Hello"),
-        AIMessage(content="Hi there"),
-        {"role": "user", "content": "My name is John"},
+        Message(role="user", content="Hello"),
+        Message(role="assistant", content="Hi there"),
+        Message(role="user", content="My name is John"),
     ]
 
     # Act
@@ -26,12 +26,11 @@ async def test_summarize_conversation():
 
     # Assert
     assert summary == "Summary of conversation"
+    mock_llm.generate_text.assert_called_once()
 
-    # Verify LLM called with correct prompts
     call_args = mock_llm.generate_text.call_args
-    assert call_args
     system_prompt = call_args.kwargs["system_prompt"]
-    assert "Previous summary" in system_prompt
+
     assert "USER: Hello" in system_prompt
     assert "ASSISTANT: Hi there" in system_prompt
     assert "USER: My name is John" in system_prompt

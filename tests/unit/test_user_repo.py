@@ -6,6 +6,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.entities.user import UserProfile
+from src.domain.value_objects import EmailAddress, Profession
 from src.infra.db.models import UserTable
 from src.infra.db.repositories.user_repo import SqlAlchemyUserRepository
 
@@ -16,7 +17,9 @@ async def test_save_user():
     mock_session = AsyncMock(spec=AsyncSession)
     repo = SqlAlchemyUserRepository(mock_session)
 
-    user = UserProfile(id=uuid4(), email="test@example.com", is_active=True)
+    user = UserProfile(
+        id=uuid4(), email=EmailAddress(value="test@example.com"), is_active=True
+    )
 
     # Act
     await repo.save(user)
@@ -44,6 +47,7 @@ async def test_get_by_id_found():
         email="found@example.com",
         is_active=True,
         created_at=datetime.now(UTC),
+        profession="Coder",
         experience_years=5,
     )
 
@@ -58,8 +62,9 @@ async def test_get_by_id_found():
     # Assert
     assert result is not None
     assert result.id == user_id
-    assert result.email == "found@example.com"
-    assert result.experience_years == 5
+    assert result.email.value == "found@example.com"
+    assert result.profession.title == "Coder"
+    assert result.profession.experience_years == 5
 
 
 @pytest.mark.asyncio
