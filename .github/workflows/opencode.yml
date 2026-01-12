@@ -29,5 +29,6 @@ jobs:
         env:
           # Use this specific variable name for the openrouter provider
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
         with:
           model: openrouter/google/gemini-3-pro-preview
