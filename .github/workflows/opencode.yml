@@ -20,10 +20,10 @@ jobs:
       issues: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
         with:
           fetch-depth: 1
-          # persist-credentials: false
+          persist-credentials: false
 
       # 1. Use v7 of the uv action (current as of Jan 2026)
       - name: Setup uv
@@ -42,6 +42,6 @@ jobs:
           # Use this specific variable name for the openrouter provider
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
-          # GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           model: openrouter/google/gemini-3-pro-preview
