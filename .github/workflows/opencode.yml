@@ -31,6 +31,7 @@ jobs:
         with:
           enable-cache: true
           cache-python: true
+          python-version: '3.12'
 
       # 2. Sync the environment (uses uv.lock if present)
       - name: Install dependencies
