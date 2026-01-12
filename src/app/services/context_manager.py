@@ -1,8 +1,6 @@
-from typing import Any
-
 from src.app.prompts.renderer import render_prompt
 from src.domain.ports.llm_provider import LLMProviderProtocol
-from src.infra.llm.messages import get_message_content, get_message_role
+from src.domain.value_objects import Message
 
 
 class ContextManager:
@@ -10,7 +8,7 @@ class ContextManager:
         self.llm_client = llm_client
 
     async def summarize_conversation(
-        self, current_summary: str, messages: list[Any], user_id: str | None = None
+        self, current_summary: str, messages: list[Message], user_id: str | None = None
     ) -> str:
         """
         Generates a new summary by combining the existing summary with new messages.
@@ -18,8 +16,8 @@ class ContextManager:
         # Format messages for the prompt
         formatted_messages = []
         for msg in messages:
-            content = get_message_content(msg)
-            role = get_message_role(msg)
+            content = msg.content
+            role = msg.role
             formatted_messages.append(f"{role.upper()}: {content}")
 
         messages_text = "\n".join(formatted_messages)

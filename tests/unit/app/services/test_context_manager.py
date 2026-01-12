@@ -1,8 +1,7 @@
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from langchain_core.messages import AIMessage, HumanMessage
-
+from src.domain.value_objects import Message
 from src.app.services.context_manager import ContextManager
 
 
@@ -16,9 +15,8 @@ async def test_summarize_conversation():
 
     current_summary = "Previous summary"
     messages = [
-        HumanMessage(content="Hello"),
-        AIMessage(content="Hi there"),
-        {"role": "user", "content": "My name is John"},
+        Message(role="user", content="Hello"),
+        Message(role="assistant", content="Hi there"),
     ]
 
     # Act
@@ -34,4 +32,3 @@ async def test_summarize_conversation():
     assert "Previous summary" in system_prompt
     assert "USER: Hello" in system_prompt
     assert "ASSISTANT: Hi there" in system_prompt
-    assert "USER: My name is John" in system_prompt
