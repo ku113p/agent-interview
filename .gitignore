@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 # Distribution / Packaging
-.python-version
+# .python-version
 .env
 .venv/
 env/

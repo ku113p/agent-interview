@@ -25,6 +25,17 @@ jobs:
           fetch-depth: 1
           # persist-credentials: false
 
+      # 1. Use v7 of the uv action (current as of Jan 2026)
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-python: true
+
+      # 2. Sync the environment (uses uv.lock if present)
+      - name: Install dependencies
+        run: uv sync --frozen
+
       - name: Run OpenCode
         uses: anomalyco/opencode/github@latest
         env:
