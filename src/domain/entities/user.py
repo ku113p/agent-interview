@@ -4,6 +4,12 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
+class CareerInfo(BaseModel):
+    model_config = ConfigDict(frozen=True)
+    profession: str | None = None
+    experience_years: int = 0
+
+
 class UserProfile(BaseModel):
     """
     Aggregate Root for the User Context.
@@ -21,8 +27,7 @@ class UserProfile(BaseModel):
     full_name: str | None = None
 
     # Career context
-    profession: str | None = None
-    experience_years: int = 0
+    career: CareerInfo = Field(default_factory=CareerInfo)
 
     @field_validator("email")
     @classmethod
@@ -43,5 +48,5 @@ class UserProfile(BaseModel):
     def update_profession(self, profession: str, years: int) -> "UserProfile":
         """Updates career information."""
         return self.model_copy(
-            update={"profession": profession, "experience_years": years}
+            update={"career": CareerInfo(profession=profession, experience_years=years)}
         )

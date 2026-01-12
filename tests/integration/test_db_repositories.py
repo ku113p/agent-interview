@@ -4,7 +4,7 @@ from uuid import uuid4
 import pytest
 
 from src.domain.entities.sphere import Sphere, SphereStatus
-from src.domain.entities.user import UserProfile
+from src.domain.entities.user import UserProfile, CareerInfo
 from src.infra.db.repositories.sphere_repo import SqlAlchemySphereRepository
 from src.infra.db.repositories.user_repo import SqlAlchemyUserRepository
 
@@ -22,8 +22,10 @@ async def test_user_repository_integration(db_session):
         is_active=True,
         created_at=datetime.now(UTC),
         full_name="Integration Test User",
-        profession="Engineer",
-        experience_years=5,
+        career=CareerInfo(
+            profession="Engineer",
+            experience_years=5,
+        ),
     )
 
     await repo.save(user)
@@ -34,7 +36,7 @@ async def test_user_repository_integration(db_session):
     assert retrieved is not None
     assert retrieved.id == user_id
     assert retrieved.email == email
-    assert retrieved.profession == "Engineer"
+    assert retrieved.career.profession == "Engineer"
 
     # Retrieve by Email
     by_email = await repo.get_by_email(email)

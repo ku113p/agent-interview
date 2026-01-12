@@ -59,7 +59,7 @@ async def test_get_by_id_found():
     assert result is not None
     assert result.id == user_id
     assert result.email == "found@example.com"
-    assert result.experience_years == 5
+    assert result.career.experience_years == 5
 
 
 @pytest.mark.asyncio

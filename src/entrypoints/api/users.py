@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.app.dependencies import get_db_session, get_user_repository
-from src.domain.entities.user import UserProfile
+from src.domain.entities.user import UserProfile, CareerInfo
 from src.domain.ports.user_repository import UserRepositoryProtocol
 
 router = APIRouter(prefix="/v1/users", tags=["users"])
@@ -84,8 +84,10 @@ async def create_user(
             id=user_id,
             email=user_data["email"],
             full_name=user_data.get("full_name"),
-            profession=user_data.get("profession"),
-            experience_years=user_data.get("experience_years", 0),
+            career=CareerInfo(
+                profession=user_data.get("profession"),
+                experience_years=user_data.get("experience_years", 0),
+            ),
         )
     except ValueError as e:
         raise HTTPException(
@@ -140,8 +142,8 @@ async def update_user(
 
     # Create updated user object - use immutable pattern
     updated_user = existing_user.update_profession(
-        updates.get("profession", existing_user.profession or ""),
-        updates.get("experience_years", existing_user.experience_years),
+        updates.get("profession", existing_user.career.profession or ""),
+        updates.get("experience_years", existing_user.career.experience_years),
     )
     updated_user = updated_user.model_copy(
         update={
