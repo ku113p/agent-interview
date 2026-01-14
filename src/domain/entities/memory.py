@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import UTC, datetime
 from enum import Enum
 from uuid import UUID, uuid4
@@ -13,8 +15,7 @@ class MemoryKind(str, Enum):
 
 class MemoryFragment(BaseModel):
     """
-    Atomic unit of memory.
-    Represents a single fact or interaction stored in the Vector DB (Mem0).
+    Atomic unit of memory for the upcoming Postgres/pgvector pipeline.
     """
 
     model_config = ConfigDict(frozen=True)
@@ -30,7 +31,7 @@ class MemoryFragment(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     metadata: dict[str, str] = Field(default_factory=dict)
 
-    def mark_important(self) -> "MemoryFragment":
+    def mark_important(self) -> MemoryFragment:
         """
         Mark memory as critically important (score 10).
         Returns a new instance.

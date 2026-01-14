@@ -32,7 +32,7 @@ graph TD
 
     subgraph Infrastructure
         Graph -->|Persists State| Postgres[(PostgreSQL)]
-        Graph -->|Vector Search| Memory[(Qdrant / Mem0)]
+        Graph -->|Vector Search| Memory[(Postgres pgvector)]
         Graph -->|Inference| LLM[LLM Provider (OpenAI)]
     end
 ```
@@ -96,7 +96,7 @@ Orchestrates the business logic.
 Implements the interfaces defined in the Domain.
 - **DB**: SQLAlchemy models and repositories.
 - **LLM**: OpenAI client wrapper.
-- **Memory**: `mem0ai` client implementation.
+- **Memory**: Pending Postgres/pgvector service (raw-first pipeline).
 
 ### 4. Entrypoints (`src/entrypoints/`)
 The "Ports" that allow the outside world to talk to the application.

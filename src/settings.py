@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 
 from pydantic import Field, PostgresDsn, RedisDsn, SecretStr
@@ -36,10 +38,6 @@ class Settings(BaseSettings):
     # Security
     SECRETS_BACKEND: str = "env"
 
-    # Vector DB
-    QDRANT_HOST: str = "localhost"
-    QDRANT_PORT: int = 6333
-
     # App Defaults
     ENVIRONMENT: str = "local"
     LOG_LEVEL: str = "INFO"
@@ -60,6 +58,17 @@ class Settings(BaseSettings):
     RATE_LIMIT_USER: int = 100  # requests per minute
     RATE_LIMIT_IP: int = 1000  # requests per minute
     TOKEN_BUDGET_LIMIT: int = 100_000  # max tokens per user
+
+    # Blob storage (MinIO)
+    MINIO_ENDPOINT: str = Field(default="http://localhost:9000")
+    MINIO_ACCESS_KEY: str = Field(default="minio")
+    MINIO_SECRET_KEY: SecretStr = Field(  # pragma: allowlist secret
+        default_factory=lambda: SecretStr("minio123")
+    )
+    MINIO_BUCKET: str = Field(default="raw-interactions")
+
+    # Feature flags
+    PGVECTOR_ENABLED: bool = Field(default=True)
 
     @classmethod
     def settings_customise_sources(

@@ -21,7 +21,7 @@
 │   │   └── services/      # Domain-App Bridge (ContextManager).
 │   ├── domain/            # 🟢 PURE PYTHON. Entities, Ports.
 │   ├── entrypoints/       # 🟣 DELIVERY. FastAPI, Telegram.
-│   ├── infra/             # 🔴 ADAPTERS. SQL, Redis, OpenAI, Mem0.
+│   ├── infra/             # 🔴 ADAPTERS. SQL, Redis, OpenAI, MinIO.
 │   ├── middleware/        # Correlation, Rate Limiting.
 │   ├── services/          # Global Utilities (CostTracker).
 │   ├── logging.py         # Structlog Configuration.
@@ -48,7 +48,7 @@
 ### 3. 🔴 `src/infra` (The Adapters)
 *   **`db/`**: SQLAlchemy 2.0 Async (Models, Repositories, Migrations).
 *   **`llm/`**: OpenAI Client wrapper.
-*   **`mem0/`**: Mem0 client for vector memory.
+*   **`storage/`**: MinIO adapters for raw payload retention.
 *   **`security/`**: Content sanitization.
 
 ### 4. 🟣 `src/entrypoints`

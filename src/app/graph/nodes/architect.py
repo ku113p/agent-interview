@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from typing import Any
 from uuid import NAMESPACE_DNS, UUID, uuid5
@@ -110,8 +112,11 @@ async def _get_memory_context(
     """Get recent memories if in a sphere."""
     if memory_service and current_sphere_id:
         try:
-            memories = await memory_service.search("", user_id, limit=5)
+            user_uuid = _user_id_to_uuid(user_id)
+            memories = await memory_service.search("", user_uuid, limit=5)
             return "\n".join([f"- {m.content}" for m in memories])
+        except NotImplementedError:
+            return "Memory recall not yet available."
         except Exception:
             return "No existing memories found."
     return ""
