@@ -7,7 +7,7 @@ Develop an **Autonomous Dialogue System** ("Deep Profiling & Biography Agent") t
 
 ## Workflow (The "Brain")
 1.  **Summarizer:** Compresses conversation history to maintain context efficiency.
-2.  **Architect:** Analyzes memory (`Mem0`), plans "Spheres" (Childhood, Career), and builds interview graphs.
+2.  **Architect:** Analyzes long-term memory (upcoming Postgres pipeline), plans "Spheres" (Childhood, Career), and builds interview graphs.
 3.  **Critic:** Validates the Architect's plan for safety, logic, and completeness *before* execution.
 4.  **Interviewer:** Executes the approved plan, conducting the dialogue and emitting facts to memory.
 
@@ -17,9 +17,9 @@ Develop an **Autonomous Dialogue System** ("Deep Profiling & Biography Agent") t
 - **Orchestration:** LangGraph (Stateful Workflows)
 - **API:** FastAPI + Uvicorn
 - **Memory/Storage:**
-    - `mem0ai`: Vector Memory
-    - `redis`: Caching
-    - `postgres`: Application Data & Checkpoints
+    - `postgres`: Application data, LangGraph checkpoints, and (soon) raw transcripts/embeddings/facts via pgvector. Enable pgvector manually (`CREATE EXTENSION IF NOT EXISTS vector;`).
+    - `redis`: Caching and rate limiting.
+    - `minio`: Raw audio/object storage. Available via `docker compose up -d minio` with default creds (`minio` / `minio123`). Create the `raw-interactions` bucket manually on first run (`mc mb minio/raw-interactions`).
 - **Observability:** LangFuse (Tracing)
 - **Testing:** `pytest` (Async), `ruff` (Linting), `mypy` (Strict Typing)
 

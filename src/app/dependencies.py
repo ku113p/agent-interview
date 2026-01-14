@@ -1,17 +1,17 @@
 from collections.abc import AsyncGenerator
 from typing import Annotated, Any
+from uuid import UUID
 
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.domain.entities.memory import MemoryFragment, MemoryKind
 from src.domain.ports.memory_service import MemoryServiceProtocol
 from src.domain.ports.sphere_repository import SphereRepositoryProtocol
 from src.domain.ports.user_repository import UserRepositoryProtocol
 from src.infra.db.repositories.sphere_repo import SqlAlchemySphereRepository
 from src.infra.db.repositories.user_repo import SqlAlchemyUserRepository
 from src.infra.db.session import get_db_session
-from src.infra.mem0.client import Mem0MemoryService
-from src.infra.redis import get_redis_client
 from src.services.cost_tracker import CostTrackerService
 from src.settings import settings
 
@@ -25,11 +25,32 @@ def get_graph(request: Request) -> Any:
     return request.app.state.graph
 
 
+class UnimplementedMemoryService(MemoryServiceProtocol):
+    """Temporary placeholder until Postgres-backed memory service lands."""
+
+    async def add(self, fragment: MemoryFragment) -> None:
+        msg = "Memory service is not yet implemented."
+        raise NotImplementedError(msg)
+
+    async def search(
+        self,
+        query: str,
+        user_id: UUID,
+        kind: MemoryKind | None = None,
+        limit: int = 5,
+    ) -> list[MemoryFragment]:
+        msg = "Memory service is not yet implemented."
+        raise NotImplementedError(msg)
+
+    async def get_recent(self, user_id: UUID, limit: int = 10) -> list[MemoryFragment]:
+        msg = "Memory service is not yet implemented."
+        raise NotImplementedError(msg)
+
+
 def get_memory_service() -> MemoryServiceProtocol:
-    """
-    Dependency that provides an initialized Mem0MemoryService.
-    """
-    return Mem0MemoryService()
+    """Dependency placeholder until new memory pipeline is available."""
+
+    return UnimplementedMemoryService()
 
 
 def get_sphere_repository(
@@ -67,6 +88,5 @@ __all__ = [
     "get_memory_service",
     "get_sphere_repository",
     "get_user_repository",
-    "get_redis_client",
     "get_cost_tracker",
 ]

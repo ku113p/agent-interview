@@ -1,15 +1,18 @@
+from __future__ import annotations
+
 import asyncio
+import logging
 import sys
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from psycopg import OperationalError
 
 # Fix for psycopg on Windows
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 from src.app.graph.workflow import create_graph
 from src.entrypoints.api import admin as admin_router
@@ -28,16 +31,21 @@ from src.settings import settings
 # Configure logging immediately
 configure_logging()
 
+LOGGER = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     database_url = str(settings.DATABASE_URL).replace("+asyncpg", "")
 
-    async with AsyncPostgresSaver.from_conn_string(database_url) as checkpointer:
-        await checkpointer.setup()
-
-        app.state.graph = create_graph(checkpointer)
-
+    try:
+        async with AsyncPostgresSaver.from_conn_string(database_url) as checkpointer:
+            await checkpointer.setup()
+            app.state.graph = create_graph(checkpointer)
+            yield
+    except OperationalError:
+        LOGGER.warning("Checkpoint database unavailable; running with in-memory graph")
+        app.state.graph = create_graph()
         yield
 
 

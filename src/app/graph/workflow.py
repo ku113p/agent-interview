@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 from langgraph.checkpoint.memory import MemorySaver
@@ -39,7 +41,7 @@ def should_continue_from_critic(state: AgentState) -> str:
     return "architect"
 
 
-def create_graph(checkpointer: Any = None) -> Any:
+def create_graph(checkpointer: Any | None = None) -> Any:
     """
     Constructs the Agentic Workflow Graph.
     """
@@ -70,7 +72,6 @@ def create_graph(checkpointer: Any = None) -> Any:
 
     checkpointer = checkpointer or MemorySaver()
 
-    # 4. Compile
     return workflow.compile(checkpointer=checkpointer)
 
 

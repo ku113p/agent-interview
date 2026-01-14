@@ -35,13 +35,13 @@ Condense each decision to what matters for running AI agents today: why, what ch
 ## 2. Data Strategy & Memory
 
 ### ADR-004: Polyglot Persistence (Hybrid Memory)
-* **Status:** Accepted
-* **Context:** Different types of human memory (semantic vs. episodic vs. factual) require different storage engines for efficient retrieval.
+* **Status:** Accepted (Revised 2026-01-14)
+* **Context:** Different types of human memory (semantic vs. episodic vs. factual) require different storage engines for efficient retrieval, but the system is transitioning to a raw-first pipeline.
 * **Decision:**
-    1.  **PostgreSQL (Relational):** For core profile attributes, strict schemas, and critical business data.
-    2.  **Mem0 (Vector/Semantic):** For semantic search and memory consolidation. Wraps Qdrant/Vector DB.
-    3.  **Redis (Cache):** For transient state and caching.
-* **Consequences:** We leverage Mem0's higher-level abstractions for user memory rather than raw vector operations.
+    1.  **PostgreSQL (Relational + pgvector):** Core profile attributes plus raw interactions, transcripts, embeddings, and facts. pgvector extension must be enabled manually in dev databases (`CREATE EXTENSION IF NOT EXISTS vector;`).
+    2.  **Redis (Cache):** Transient state and rate limiting.
+    3.  **MinIO (Blob Storage):** Raw audio payloads for transcription pipeline. Local MinIO now ships via `docker-compose` with default credentials (`minio`/`minio123`); developers must create the `raw-interactions` bucket on first run (`mc mb minio/raw-interactions`).
+* **Consequences:** Mem0/Qdrant are removed. Phase 1 purposely avoids Alembic migrations—drop local DBs and recreate tables using `Base.metadata.create_all()` or the SQL snippets above. Local development only requires Postgres + Redis + MinIO (`docker compose up -d app-db redis minio`).
 
 ### ADR-005: Strict Data Validation
 * **Status:** Accepted

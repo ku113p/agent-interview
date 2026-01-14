@@ -23,9 +23,9 @@ dependencies = [
     "openai>=1.59.0",
     "psycopg-binary>=3.3.2",
     "httpx>=0.28.1",
-    "mem0ai>=0.1.0",
-    "qdrant-client>=1.7.0",
     "markdown>=3.10",
+    "pgvector>=0.2.5",
+    "minio>=7.2.10",
 ]
 [dependency-groups]
 dev = [
@@ -52,6 +52,8 @@ python_version = "3.12" # Mypy execution version
 strict = true
 disallow_untyped_defs = true
 ignore_missing_imports = false
+warn_unused_configs = true
+explicit_package_bases = true
 plugins = ["pydantic.mypy"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
