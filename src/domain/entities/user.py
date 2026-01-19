@@ -1,7 +1,9 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field
+
+from src.domain.value_objects import EmailAddress
 
 
 class UserProfile(BaseModel):
@@ -14,7 +16,7 @@ class UserProfile(BaseModel):
     model_config = ConfigDict(frozen=True, from_attributes=True)
 
     id: UUID = Field(default_factory=uuid4, description="Unique aggregate ID")
-    email: EmailStr
+    email: EmailAddress
     is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
@@ -23,15 +25,6 @@ class UserProfile(BaseModel):
     # Career context
     profession: str | None = None
     experience_years: int = 0
-
-    @field_validator("email")
-    @classmethod
-    def validate_email_domain(cls, v: str) -> str:
-        """Domain Logic: We don't accept disposable emails."""
-        v_lower = v.lower()
-        if "tempmail" in v_lower:
-            raise ValueError("Disposable emails are forbidden.")
-        return v_lower
 
     def activate(self) -> "UserProfile":
         """

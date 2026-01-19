@@ -7,7 +7,9 @@ from langfuse import observe
 
 from src.app.graph.state import AgentState
 from src.app.services.context_manager import ContextManager
+from src.domain.value_objects import Message
 from src.infra.llm.client import get_llm_client
+from src.infra.llm.messages import get_message_content, get_message_role
 from src.settings import settings
 
 logger = structlog.get_logger()
@@ -42,8 +44,15 @@ async def summarizer_node(state: AgentState, config: RunnableConfig) -> dict[str
     try:
         # Generate new summary
         user_id = state.get("user_id")
+
+        # Convert to domain messages
+        domain_msgs = [
+            Message(role=get_message_role(m), content=get_message_content(m))
+            for m in msgs_to_summarize
+        ]
+
         new_summary = await context_manager.summarize_conversation(
-            current_summary, msgs_to_summarize, user_id=user_id
+            current_summary, domain_msgs, user_id=user_id
         )
 
         # Create delete operations for summarized messages

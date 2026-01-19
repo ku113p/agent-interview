@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.entities.user import UserProfile
 from src.domain.ports.user_repository import UserRepositoryProtocol
+from src.domain.value_objects import EmailAddress
 
 
 class SqlAlchemyUserRepository(UserRepositoryProtocol):
@@ -52,7 +53,7 @@ class SqlAlchemyUserRepository(UserRepositoryProtocol):
 
         record = UserTable(
             id=user.id,
-            email=user.email,
+            email=user.email.value,
             is_active=user.is_active,
             created_at=user.created_at,
             full_name=user.full_name,
@@ -69,7 +70,7 @@ class SqlAlchemyUserRepository(UserRepositoryProtocol):
 
         return UserProfile(
             id=r.id,
-            email=r.email,
+            email=EmailAddress(value=r.email),
             is_active=r.is_active,
             created_at=r.created_at,
             full_name=r.full_name,
