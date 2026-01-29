@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.domain.entities.user import UserProfile
+from src.domain.entities.user import UserProfile, CareerInfo
 from src.domain.ports.user_repository import UserRepositoryProtocol
 
 
@@ -56,8 +56,8 @@ class SqlAlchemyUserRepository(UserRepositoryProtocol):
             is_active=user.is_active,
             created_at=user.created_at,
             full_name=user.full_name,
-            profession=user.profession,
-            experience_years=user.experience_years,
+            profession=user.career.profession,
+            experience_years=user.career.experience_years,
         )
 
         await self._session.merge(record)
@@ -73,6 +73,8 @@ class SqlAlchemyUserRepository(UserRepositoryProtocol):
             is_active=r.is_active,
             created_at=r.created_at,
             full_name=r.full_name,
-            profession=r.profession,
-            experience_years=r.experience_years,
+            career=CareerInfo(
+                profession=r.profession,
+                experience_years=r.experience_years,
+            ),
         )

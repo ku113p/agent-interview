@@ -4,17 +4,19 @@ import pytest
 from pydantic import ValidationError
 
 from src.domain.entities.memory import MemoryFragment, MemoryKind
-from src.domain.entities.user import UserProfile
+from src.domain.entities.user import UserProfile, CareerInfo
 
 
 class TestUserProfile:
     def test_should_create_valid_user(self) -> None:
         user = UserProfile(
-            email="test@example.com", full_name="Teo", profession="Coder"
+            email="test@example.com",
+            full_name="Teo",
+            career=CareerInfo(profession="Coder"),
         )
         assert user.email == "test@example.com"
         assert user.is_active is True
-        assert user.profession == "Coder"
+        assert user.career.profession == "Coder"
 
     def test_should_reject_tempmail(self) -> None:
         with pytest.raises(ValidationError) as exc:
@@ -35,12 +37,14 @@ class TestUserProfile:
         assert activated_user.id == user.id
 
     def test_update_profession_should_return_new_instance(self) -> None:
-        user = UserProfile(email="career@example.com", experience_years=2)
+        user = UserProfile(
+            email="career@example.com", career=CareerInfo(experience_years=2)
+        )
         updated_user = user.update_profession("Senior Dev", 5)
 
-        assert user.profession is None
-        assert updated_user.profession == "Senior Dev"
-        assert updated_user.experience_years == 5
+        assert user.career.profession is None
+        assert updated_user.career.profession == "Senior Dev"
+        assert updated_user.career.experience_years == 5
 
 
 class TestMemoryFragment:

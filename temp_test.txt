@@ -18,10 +18,7 @@ def test_architect_template_renders_with_valid_data(jinja_env: Environment) -> N
     """Test that architect template renders correctly with valid data."""
     template = jinja_env.get_template("architect_v1.j2")
 
-    user_profile = {
-        "name": "John Doe",
-        "career": {"profession": "Software Engineer", "experience_years": 5},
-    }
+    user_profile = {"name": "John Doe", "profession": "Software Engineer"}
     rendered = template.render(
         user_profile_json=json.dumps(user_profile),
         user_request="Help me prepare for interviews",
