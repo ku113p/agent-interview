@@ -50,29 +50,36 @@ class SqlAlchemyUserRepository(UserRepositoryProtocol):
     async def save(self, user: UserProfile) -> None:
         from src.infra.db.models import UserTable
 
+        profession_title = user.profession.title if user.profession else None
+        experience_years = user.profession.experience_years if user.profession else 0
+
         record = UserTable(
             id=user.id,
-            email=user.email,
+            email=user.email.value,
             is_active=user.is_active,
             created_at=user.created_at,
             full_name=user.full_name,
-            profession=user.profession,
-            experience_years=user.experience_years,
+            profession=profession_title,
+            experience_years=experience_years,
         )
 
         await self._session.merge(record)
 
     def _to_domain(self, row: object) -> UserProfile:
         from typing import Any
+        from src.domain.value_objects import EmailAddress, Profession
 
         r: Any = row
 
+        prof = None
+        if r.profession:
+            prof = Profession(title=r.profession, experience_years=r.experience_years)
+
         return UserProfile(
             id=r.id,
-            email=r.email,
+            email=EmailAddress(value=r.email),
             is_active=r.is_active,
             created_at=r.created_at,
             full_name=r.full_name,
-            profession=r.profession,
-            experience_years=r.experience_years,
+            profession=prof,
         )

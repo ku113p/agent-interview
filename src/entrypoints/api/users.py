@@ -7,8 +7,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.app.dependencies import get_db_session, get_user_repository
 from src.domain.entities.user import UserProfile
 from src.domain.ports.user_repository import UserRepositoryProtocol
+from src.domain.value_objects import EmailAddress, Profession
+from src.entrypoints.api.schemas import UserResponse
 
 router = APIRouter(prefix="/v1/users", tags=["users"])
+
+
+def _to_response(user: UserProfile) -> UserResponse:
+    return UserResponse(
+        id=user.id,
+        email=user.email.value,
+        is_active=user.is_active,
+        created_at=user.created_at,
+        full_name=user.full_name,
+        profession=user.profession.title if user.profession else None,
+        experience_years=user.profession.experience_years if user.profession else 0,
+    )
 
 
 @router.get("/")
@@ -19,16 +33,14 @@ async def list_users(
     """
     List all users with pagination.
     """
-    # TODO: Implement proper listing in the domain layer
-    # For now, return empty list to avoid implementing unsupported methods
     return {"users": [], "total": 0, "limit": limit, "offset": offset}
 
 
-@router.get("/{user_id}", response_model=UserProfile)
+@router.get("/{user_id}", response_model=UserResponse)
 async def get_user(
     user_id: str,
     user_repo: Annotated[UserRepositoryProtocol, Depends(get_user_repository)],
-) -> UserProfile:
+) -> UserResponse:
     """
     Get a user profile by ID.
     """
@@ -40,33 +52,32 @@ async def get_user(
     user = await user_repo.get_by_id(user_uuid)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return _to_response(user)
 
 
-@router.get("/by-email/{email}", response_model=UserProfile)
+@router.get("/by-email/{email}", response_model=UserResponse)
 async def get_user_by_email(
     email: str,
     user_repo: Annotated[UserRepositoryProtocol, Depends(get_user_repository)],
-) -> UserProfile:
+) -> UserResponse:
     """
     Get a user profile by email address.
     """
     user = await user_repo.get_by_email(email)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    return user
+    return _to_response(user)
 
 
 @router.post("/")
 async def create_user(
-    user_data: dict[str, Any],  # Pydantic model could be added later
+    user_data: dict[str, Any],
     user_repo: Annotated[UserRepositoryProtocol, Depends(get_user_repository)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> dict[str, Any]:
+) -> UserResponse:
     """
     Create a new user profile.
     """
-    # Validate required fields
     required_fields = ["id", "email"]
     for field in required_fields:
         if field not in user_data:
@@ -80,26 +91,32 @@ async def create_user(
             if isinstance(user_data["id"], str)
             else user_data["id"]
         )
+
+        prof = None
+        if user_data.get("profession"):
+            prof = Profession(
+                title=user_data["profession"],
+                experience_years=user_data.get("experience_years", 0),
+            )
+
         user = UserProfile(
             id=user_id,
-            email=user_data["email"],
+            email=EmailAddress(value=user_data["email"]),
             full_name=user_data.get("full_name"),
-            profession=user_data.get("profession"),
-            experience_years=user_data.get("experience_years", 0),
+            profession=prof,
         )
     except ValueError as e:
         raise HTTPException(
             status_code=400, detail=f"Invalid user data: {str(e)}"
         ) from e
 
-    # Check if user already exists
     existing = await user_repo.get_by_id(user_id)
     if existing:
         raise HTTPException(status_code=409, detail="User already exists")
 
     await user_repo.save(user)
     await db.commit()
-    return user.model_dump()
+    return _to_response(user)
 
 
 @router.put("/{user_id}")
@@ -108,7 +125,7 @@ async def update_user(
     user_data: dict[str, Any],
     user_repo: Annotated[UserRepositoryProtocol, Depends(get_user_repository)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
-) -> dict[str, Any]:
+) -> UserResponse:
     """
     Update an existing user profile.
     """
@@ -117,12 +134,10 @@ async def update_user(
     except ValueError as e:
         raise HTTPException(status_code=400, detail="Invalid user ID format") from e
 
-    # Check if user exists
     existing_user = await user_repo.get_by_id(user_uuid)
     if not existing_user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Update fields
     updates = {}
     updatable_fields = [
         "email",
@@ -138,22 +153,32 @@ async def update_user(
     if not updates:
         raise HTTPException(status_code=400, detail="No valid fields to update")
 
-    # Create updated user object - use immutable pattern
-    updated_user = existing_user.update_profession(
-        updates.get("profession", existing_user.profession or ""),
-        updates.get("experience_years", existing_user.experience_years),
+    curr_title = existing_user.profession.title if existing_user.profession else ""
+    curr_years = (
+        existing_user.profession.experience_years if existing_user.profession else 0
     )
-    updated_user = updated_user.model_copy(
-        update={
-            k: v
-            for k, v in updates.items()
-            if k not in ["profession", "experience_years"]
-        }
-    )
+
+    new_title = updates.get("profession", curr_title)
+    new_years = updates.get("experience_years", curr_years)
+
+    if "profession" in updates or "experience_years" in updates:
+        updated_user = existing_user.update_profession(new_title, new_years)
+    else:
+        updated_user = existing_user
+
+    if "email" in updates:
+        updates["email"] = EmailAddress(value=updates["email"])
+
+    fields_to_update = {
+        k: v for k, v in updates.items() if k not in ["profession", "experience_years"]
+    }
+
+    if fields_to_update:
+        updated_user = updated_user.model_copy(update=fields_to_update)
 
     await user_repo.save(updated_user)
     await db.commit()
-    return updated_user.model_dump()
+    return _to_response(updated_user)
 
 
 @router.delete("/{user_id}")
@@ -174,6 +199,4 @@ async def delete_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # In a real implementation, you'd need a delete method in the repository
-    # For now, this is a placeholder since the domain doesn't specify user deletion
     raise HTTPException(status_code=501, detail="User deletion not implemented")

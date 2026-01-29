@@ -1,6 +1,8 @@
 from typing import Any
+from uuid import UUID
+from datetime import datetime
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, EmailStr
 
 from src.app.schemas import CritiqueSchema, PlanSchema
 from src.infra.security.sanitization import sanitize_input
@@ -57,3 +59,12 @@ class ThreadStateResponse(BaseModel):
     plan_approved: bool | None = None
     step_count: int
     messages: list[dict[str, Any]] = Field(default_factory=list)
+
+class UserResponse(BaseModel):
+    id: UUID
+    email: EmailStr
+    is_active: bool
+    created_at: datetime
+    full_name: str | None = None
+    profession: str | None = None
+    experience_years: int = 0
