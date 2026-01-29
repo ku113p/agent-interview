@@ -2,7 +2,7 @@ from typing import Any
 
 from src.app.prompts.renderer import render_prompt
 from src.domain.ports.llm_provider import LLMProviderProtocol
-from src.infra.llm.messages import get_message_content, get_message_role
+from src.app.common.messages import get_message_content, get_message_role
 
 
 class ContextManager:

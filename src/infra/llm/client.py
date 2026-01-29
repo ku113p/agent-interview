@@ -11,7 +11,7 @@ from tenacity import (
 )
 
 from src.domain.ports.llm_provider import LLMProviderProtocol
-from src.infra.llm.messages import convert_to_openai_messages
+from src.app.common.messages import convert_to_openai_messages
 from src.settings import settings
 
 logger = structlog.get_logger()

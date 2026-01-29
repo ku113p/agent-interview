@@ -2,7 +2,7 @@ import pytest
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from src.domain.exceptions import LLMMessageValidationError
-from src.infra.llm.messages import convert_to_openai_messages
+from src.app.common.messages import convert_to_openai_messages
 
 
 class TestMessageConversion:
